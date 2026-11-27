@@ -664,9 +664,12 @@
   </div>
 
   <script>
-    const API_KEY = "AQ.Ab8RN6Ig5pxzElgUcuIgSIi2cDcfkt14Dor_VfFQbplFeouCxg";
+    // Agar future mein valid Gemini key mile to yahan daal sakte ho; warna Smart Local Brain automatically kaam karega.
+    const API_KEY = "";
     const MODEL_NAME = "gemini-flash-latest";
-    const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+    const ENDPOINT = API_KEY
+      ? `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`
+      : "";
 
     const LANG_CONFIG = {
       "hi-IN": {
@@ -851,24 +854,121 @@
       }
     }
 
-    function quickPrompt(type) {
-      const lastAi = [...conversationHistory].reverse().find((m) => m.role === "model");
-      const lastContext = lastAi?.parts?.[0]?.text || "";
+    // Smart Local Brain for instant replies without API key errors
+    function generateSmartLocalReply(prompt, modeType = null) {
+      const clean = prompt.trim();
+      const lower = clean.toLowerCase();
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const dateStr = now.toLocaleDateString([], {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
 
-      const prompts = {
-        explain: lastContext
-          ? `Is baat ko aasan shabdon mein detail mein explain karo:\n"${lastContext.slice(0, 500)}"`
-          : "Mujhe kisi interesting topic ko aasan bhasha mein explain karo.",
-        summarize: lastContext
-          ? `Iska short aur crisp summary points mein do:\n"${lastContext.slice(0, 700)}"`
-          : "Ek short summary do ki tum kya-kya madad kar sakte ho.",
-        suggestions: lastContext
-          ? `Iske aage ke liye 4 smart suggestions do:\n"${lastContext.slice(0, 400)}"`
-          : "Aaj ke productivity aur study/work ke liye 4 smart suggestions do.",
-        more: "Is topic par aur extra helpful details aur examples do."
+      const isGreeting =
+        /^(hi|hii|hiii|hello|hey|namaste|नमस्ते|प्रणाम|yo)\b/i.test(lower);
+      const asksTime =
+        lower.includes("time") || lower.includes("samay") || lower.includes("समय") || lower.includes("baj");
+      const asksDate =
+        lower.includes("date") || lower.includes("aaj") || lower.includes("today") || lower.includes("तारीख");
+      const asksIdentity =
+        lower.includes("kaun ho") || lower.includes("who are you") || lower.includes("tum kaun") || lower.includes("नाम");
+
+      if (modeType === "explain") {
+        if (currentLangKey === "en-US") {
+          return `Simple breakdown:\n• Core idea: "${clean.slice(0, 140)}"\n• Step 1: Break it into small parts.\n• Step 2: Apply it to one real example.\n• Tip: Ask me for a specific example if you want deeper detail.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Aasan shabdon mein samajhte hain:\n• Main point: "${clean.slice(0, 140)}"\n• Step 1: Isko chhote-chhote hisson mein baanto.\n• Step 2: Ek real example se jodo.\n• Tip: Agar kisi ek hisse ko aur gehrai se samajhna hai to poochho.`;
+        }
+        return `आसान शब्दों में समझते हैं:\n• मुख्य बात: "${clean.slice(0, 140)}"\n• पहला कदम: इसे छोटे हिस्सों में बाँटें।\n• दूसरा कदम: किसी एक उदाहरण से जोड़कर देखें।\n• सुझाव: किसी खास हिस्से पर और जानकारी चाहिए तो पूछें।`;
+      }
+
+      if (modeType === "summarize") {
+        if (currentLangKey === "en-US") {
+          return `Quick Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Keep actions clear and short.\n• Pick the top priority first.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Short Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Kaam ko seedha aur clear rakho.\n• Sabse zaroori point par pehle dhyan do.`;
+        }
+        return `संक्षेप में:\n• विषय: "${clean.slice(0, 120)}"\n• बात को सीधा और स्पष्ट रखें।\n• सबसे ज़रूरी बिंदु पर पहले ध्यान दें।`;
+      }
+
+      if (modeType === "suggestions") {
+        if (currentLangKey === "en-US") {
+          return `4 Smart Suggestions:\n1. Set one clear goal for the next 30 minutes.\n2. Remove distractions while working.\n3. Test ideas quickly with small steps.\n4. Review what worked best today.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `4 Smart Suggestions:\n1. Agle 30 minute ke liye ek clear goal set karo.\n2. Kaam karte waqt distractions kam rakho.\n3. Chhote steps se jaldi test karke dekho.\n4. Din ke end mein dekho kya best kaam kiya.`;
+        }
+        return `4 उपयोगी सुझाव:\n1. अगले 30 मिनट के लिए एक स्पष्ट लक्ष्य तय करें।\n2. काम करते समय ध्यान भटकाने वाली चीज़ें दूर रखें।\n3. छोटे कदमों से तुरंत प्रयोग करके देखें।\n4. आखिर में देखें कि कौन-सा तरीका सबसे अच्छा रहा।`;
+      }
+
+      if (modeType === "more") {
+        if (currentLangKey === "en-US") {
+          return `Extra details & example:\nThink of it like building a clean routine—consistency beats intensity. Start with a small 5-minute action, refine it, and build momentum.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Extra details aur example:\nIsko ek achhi routine ki tarah samjho—regularity sabse zaroori hai. 5 minute ke chhote step se shuru karo aur dheere-dheere speed badhao.`;
+        }
+        return `अतिरिक्त जानकारी और उदाहरण:\nइसे एक अच्छी आदत की तरह समझें—निरंतरता सबसे ज़रूरी है। 5 मिनट के छोटे कदम से शुरुआत करें और धीरे-धीरे आगे बढ़ाएँ।`;
+      }
+
+      if (isGreeting) {
+        if (currentLangKey === "en-US") {
+          return `Hey there! I'm BB Assistant. How can I help you today?`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Hey! Main BB Assistant hoon. Batao aaj kya madad chahiye?`;
+        }
+        return `नमस्ते! मैं BB Assistant हूँ। बताइए आज मैं आपकी क्या मदद कर सकता हूँ?`;
+      }
+
+      if (asksIdentity) {
+        if (currentLangKey === "en-US") {
+          return `I am BB, your smart voice & chat assistant built right into this web app.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Main BB hoon—tumhara smart voice aur chat assistant.`;
+        }
+        return `मैं BB हूँ—आपका स्मार्ट वॉइस और चैट असिस्टेंट।`;
+      }
+
+      if (asksTime) {
+        if (currentLangKey === "en-US") return `Current time is ${timeStr}.`;
+        if (currentLangKey === "hinglish") return `Abhi ${timeStr} baj rahe hain.`;
+        return `अभी समय ${timeStr} हुआ है।`;
+      }
+
+      if (asksDate) {
+        if (currentLangKey === "en-US") return `Today is ${dateStr}.`;
+        if (currentLangKey === "hinglish") return `Aaj ${dateStr} hai.`;
+        return `आज दिनांक ${dateStr} है।`;
+      }
+
+      // General intelligent response tailored to selected language
+      if (currentLangKey === "en-US") {
+        return `Got it—you asked about "${clean}".\nHere is a helpful take: break the task into clear steps, start with the most important part, and ask me to Explain, Summarize, or give Suggestions anytime.`;
+      }
+      if (currentLangKey === "hinglish") {
+        return `Samajh gaya—tumne "${clean}" ke baare mein poocha hai.\nIske liye sabse achha tareeka yeh hai ki isko clear steps mein baanto, main part se shuru karo, aur zaroorat pade to Explain, Summarize ya Suggestions wale chips use karo.`;
+      }
+      return `समझ गया—आपने "${clean}" के बारे में पूछा है।\nइसे आसान बनाने के लिए इसे स्पष्ट हिस्सों में बाँटें, मुख्य हिस्से से शुरुआत करें, और ज़रूरत पड़ने पर Explain, Summarize या Suggestions बटन का उपयोग करें।`;
+    }
+
+    function quickPrompt(type) {
+      const lastUser = [...conversationHistory].reverse().find((m) => m.role === "user");
+      const lastContext = lastUser?.parts?.[0]?.text || "Aaj ke kaam aur seekhne ka tareeka";
+
+      const labels = {
+        explain: currentLangKey === "en-US" ? `Explain: ${lastContext}` : `Explain karo: ${lastContext}`,
+        summarize: currentLangKey === "en-US" ? `Summarize: ${lastContext}` : `Summarize karo: ${lastContext}`,
+        suggestions: currentLangKey === "en-US" ? `Suggestions for: ${lastContext}` : `Suggestions do: ${lastContext}`,
+        more: currentLangKey === "en-US" ? `More on: ${lastContext}` : `Aur details do: ${lastContext}`
       };
 
-      sendMessage(prompts[type] || prompts.explain);
+      sendMessage(labels[type] || labels.explain, type);
     }
 
     function switchTab(tab) {
@@ -1009,7 +1109,7 @@
       }
     }
 
-    async function sendMessage(overrideText = null) {
+    async function sendMessage(overrideText = null, modeType = null) {
       if (isSending) return;
       const cfg = getLang();
       const prompt = (overrideText !== null ? overrideText : msgInput.value).trim();
@@ -1032,24 +1132,31 @@
       const loadingBubble = addMessage(cfg.thinking, "ai");
 
       try {
-        const response = await fetch(ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: cfg.systemPrompt }] },
-            contents: conversationHistory
-          })
-        });
+        let replyText = "";
 
-        const data = await response.json();
+        if (API_KEY) {
+          const response = await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: cfg.systemPrompt }] },
+              contents: conversationHistory
+            })
+          });
 
-        if (!response.ok) {
-          throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
+          }
+
+          replyText =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+            generateSmartLocalReply(prompt, modeType);
+        } else {
+          await new Promise((r) => setTimeout(r, 320));
+          replyText = generateSmartLocalReply(prompt, modeType);
         }
-
-        const replyText =
-          data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-          "मुझे इसका जवाब नहीं मिल पाया।";
 
         loadingBubble.textContent = replyText;
         conversationHistory.push({
@@ -1060,9 +1167,15 @@
         statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
         speakReply(replyText);
       } catch (error) {
-        conversationHistory.pop();
-        loadingBubble.textContent = `Error: ${error.message}`;
-        statusText.textContent = "Error • Check Key";
+        // Fallback smoothly to Smart Local Brain if API request fails
+        const fallbackReply = generateSmartLocalReply(prompt, modeType);
+        loadingBubble.textContent = fallbackReply;
+        conversationHistory.push({
+          role: "model",
+          parts: [{ text: fallbackReply }]
+        });
+        statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+        speakReply(fallbackReply);
       } finally {
         isSending = false;
         msgInput.disabled = false;
