@@ -48,7 +48,6 @@
       position: relative;
     }
 
-    /* Animations */
     @keyframes fadeSlideUp {
       from {
         opacity: 0;
@@ -81,7 +80,6 @@
       100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
     }
 
-    /* Header Card */
     .header-card {
       background: var(--card);
       border: 1px solid var(--border-glow);
@@ -128,9 +126,6 @@
       font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: 0.2px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .brand-info p {
@@ -190,7 +185,6 @@
       flex-shrink: 0;
     }
 
-    /* Action Row (Voice & Clear Chat) */
     .top-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -230,7 +224,6 @@
       color: #8df5c3;
     }
 
-    /* Chat Area */
     .chat-container {
       flex: 1;
       overflow-y: auto;
@@ -332,7 +325,6 @@
       animation: fadeSlideUp 0.25s ease;
     }
 
-    /* Quick Action Chips */
     .quick-chips {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -360,7 +352,6 @@
       transform: translateY(-1px);
     }
 
-    /* Input Bar */
     .input-box {
       background: rgba(15, 22, 45, 0.95);
       border: 1.5px solid var(--border-glow);
@@ -428,7 +419,6 @@
       box-shadow: 0 4px 14px rgba(112, 86, 255, 0.45);
     }
 
-    /* Bottom Navigation */
     .bottom-nav {
       background: #070b18;
       border-top: 1px solid var(--border-subtle);
@@ -456,7 +446,6 @@
       transform: translateY(-1px);
     }
 
-    /* Settings Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -553,7 +542,6 @@
 <body>
   <div class="phone-shell">
     <div>
-      <!-- Top Header Card -->
       <header class="header-card">
         <div class="brand-left">
           <div class="bot-avatar" aria-hidden="true">
@@ -570,7 +558,7 @@
           </div>
           <div class="brand-info">
             <h1>BB Assistant</h1>
-            <p id="subTitle">Your smart companion ✨</p>
+            <p id="subTitle">Nova Brain Core ✨</p>
           </div>
         </div>
 
@@ -583,7 +571,6 @@
         </div>
       </header>
 
-      <!-- Voice & Clear Chat Row -->
       <div class="top-actions">
         <button id="voiceBtn" class="pill-btn" onclick="toggleVoice()">
           <span>🔊</span>
@@ -596,10 +583,8 @@
       </div>
     </div>
 
-    <!-- Chat Messages -->
     <main id="chatContainer" class="chat-container"></main>
 
-    <!-- Bottom Controls -->
     <div>
       <div class="quick-chips">
         <button class="chip" onclick="quickPrompt('explain')">⭐ Explain</button>
@@ -637,7 +622,6 @@
     </div>
   </div>
 
-  <!-- Settings Modal -->
   <div id="settingsModal" class="modal-backdrop" onclick="backdropClose(event)">
     <div class="modal-card">
       <h2>Assistant Settings</h2>
@@ -664,11 +648,6 @@
   </div>
 
   <script>
-    // Agar OpenAI ChatGPT API key ho to yahan daalein; khali rakhne par Smart Local Brain chalega.
-    const OPENAI_API_KEY = "";
-    const OPENAI_MODEL = "gpt-4o-mini";
-    const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
-
     const LANG_CONFIG = {
       "hi-IN": {
         speechLang: "hi-IN",
@@ -676,13 +655,11 @@
         voiceOff: "Voice: Off",
         voiceOn: "Voice: On",
         clearChat: "Clear Chat",
-        welcome: 'नमस्ते! मैं BB हूँ। बोलने के लिए "Hey BB" कहें या Mic बटन दबाएँ।',
-        clearedNote: "चैट साफ़ कर दी गई है।",
+        welcome: 'नमस्ते! मैं BB हूँ (Nova Brain के साथ)। बोलने के लिए "Hey BB" कहें या Mic बटन दबाएँ।',
+        clearedNote: "चैट और कॉन्टेक्स्ट साफ़ कर दिए गए हैं।",
         thinking: "सोच रहा हूँ...",
         listeningCmd: 'सुन रहा हूँ... सवाल बोलें',
-        onlineWake: 'Online • "Hey BB"',
-        systemPrompt:
-          "Tum BB ho, ek helpful, clear aur friendly AI assistant. Hamesha saral aur clear Hindi mein jawab do."
+        onlineWake: 'Online • "Hey BB"'
       },
       "hinglish": {
         speechLang: "hi-IN",
@@ -690,13 +667,11 @@
         voiceOff: "Voice: Off",
         voiceOn: "Voice: On",
         clearChat: "Clear Chat",
-        welcome: 'Namaste! Main BB hoon. Mic on karne ke liye "Hey BB" bolein ya mic icon dabayein.',
-        clearedNote: "Chat clear kar di gayi hai.",
+        welcome: 'Namaste! Main BB hoon (Nova Brain ke saath). Mic on karne ke liye "Hey BB" bolein ya mic icon dabayein.',
+        clearedNote: "Chat aur context clear kar diye gaye hain.",
         thinking: "Soch raha hoon...",
         listeningCmd: "Sun raha hoon... sawal bolein",
-        onlineWake: 'Online • "Hey BB"',
-        systemPrompt:
-          "Tum BB ho, ek helpful, clear aur friendly AI assistant. Hamesha Hinglish (Roman Hindi) mein jawab do."
+        onlineWake: 'Online • "Hey BB"'
       },
       "en-US": {
         speechLang: "en-US",
@@ -704,18 +679,403 @@
         voiceOff: "Voice: Off",
         voiceOn: "Voice: On",
         clearChat: "Clear Chat",
-        welcome: 'Hello! I am BB. Say "Hey BB" or tap the mic to start speaking.',
-        clearedNote: "Chat cleared.",
+        welcome: 'Hello! I am BB (powered by Nova Brain). Say "Hey BB" or tap the mic to start speaking.',
+        clearedNote: "Chat and context cleared.",
         thinking: "Thinking...",
         listeningCmd: "Listening... speak now",
-        onlineWake: 'Online • "Hey BB"',
-        systemPrompt:
-          "You are BB, a helpful, clear, and smart AI assistant. Always answer clearly in English."
+        onlineWake: 'Online • "Hey BB"'
       }
     };
 
-    // OpenAI format history: { role: "user" | "assistant", content: "..." }
-    const chatMessages = [];
+    // ==================== NOVA AI BRAIN IN JAVASCRIPT ====================
+
+    const Intent = Object.freeze({
+      GREETING: "GREETING",
+      QUESTION: "QUESTION",
+      RESEARCH: "RESEARCH",
+      CALCULATION: "CALCULATION",
+      CREATION: "CREATION",
+      CODING: "CODING",
+      PLANNING: "PLANNING",
+      MEMORY: "MEMORY",
+      TOOL_ACTION: "TOOL_ACTION",
+      GENERAL: "GENERAL"
+    });
+
+    class MemoryCore {
+      constructor() {
+        this.store = new Map();
+      }
+      save(key, value) {
+        this.store.set(key.toLowerCase(), value);
+      }
+      recall(key) {
+        return this.store.get(key.toLowerCase()) ?? null;
+      }
+      forget(key) {
+        return this.store.delete(key.toLowerCase());
+      }
+      getAll() {
+        return Object.fromEntries(this.store.entries());
+      }
+      clear() {
+        this.store.clear();
+      }
+    }
+
+    class ContextCore {
+      constructor(maxHistory = 20) {
+        this.history = [];
+        this.maxHistory = maxHistory;
+      }
+      add(user, assistant) {
+        this.history.push(`User: ${user}`);
+        this.history.push(`Assistant: ${assistant}`);
+        while (this.history.length > this.maxHistory) {
+          this.history.shift();
+        }
+      }
+      getContext() {
+        return this.history.join("\n");
+      }
+      getLastUserMessage() {
+        for (let i = this.history.length - 1; i >= 0; i--) {
+          if (this.history[i].startsWith("User: ")) {
+            return this.history[i].slice(6);
+          }
+        }
+        return null;
+      }
+      clear() {
+        this.history.length = 0;
+      }
+    }
+
+    class IntentEngine {
+      static detect(input) {
+        const text = input.toLowerCase();
+
+        if (/\b(hi|hii|hiii|hello|hey|good morning|good evening|namaste|नमस्ते)\b/.test(text)) {
+          return Intent.GREETING;
+        }
+        if (/\b(remember|recall|forget|memory|yaad)\b|याद/.test(text)) {
+          return Intent.MEMORY;
+        }
+        if (/\b(search|research|find online|look up)\b/.test(text)) {
+          return Intent.RESEARCH;
+        }
+        if (/\b(calculate|math|solve|equation)\b|(\d+\s*[\+\-\*\/x×÷]\s*\d+)/.test(text)) {
+          return Intent.CALCULATION;
+        }
+        if (/\b(code|program|java|python|javascript|html|debug|software)\b/.test(text)) {
+          return Intent.CODING;
+        }
+        if (/\b(plan|schedule|organize|steps|strategy)\b/.test(text)) {
+          return Intent.PLANNING;
+        }
+        if (/\b(create|write|build|design|generate)\b/.test(text)) {
+          return Intent.CREATION;
+        }
+        if (/\b(open|launch|start|run|execute|uppercase)\b/.test(text)) {
+          return Intent.TOOL_ACTION;
+        }
+        if (text.includes("?")) {
+          return Intent.QUESTION;
+        }
+        return Intent.GENERAL;
+      }
+    }
+
+    class TaskPlan {
+      constructor(intent, steps) {
+        this.intent = intent;
+        this.steps = steps;
+      }
+    }
+
+    class Planner {
+      createPlan(intent, input) {
+        const steps = ["Understand the request", "Identify required information"];
+
+        switch (intent) {
+          case Intent.RESEARCH:
+            steps.push("Gather information", "Check information quality", "Summarize findings");
+            break;
+          case Intent.CODING:
+            steps.push("Analyze requirements", "Design solution", "Generate code", "Review for errors");
+            break;
+          case Intent.CALCULATION:
+            steps.push("Identify mathematical inputs", "Calculate result", "Verify calculation");
+            break;
+          case Intent.PLANNING:
+            steps.push("Determine goal", "Break goal into tasks", "Prioritize tasks");
+            break;
+          case Intent.CREATION:
+            steps.push("Determine output format", "Create requested content", "Review output");
+            break;
+          default:
+            steps.push("Develop an appropriate response");
+            break;
+        }
+
+        steps.push("Deliver final response");
+        return new TaskPlan(intent, steps);
+      }
+    }
+
+    class ToolCore {
+      constructor() {
+        this.tools = new Map();
+      }
+      register(name, fn) {
+        this.tools.set(name.toLowerCase(), fn);
+      }
+      hasTool(name) {
+        return this.tools.has(name.toLowerCase());
+      }
+      execute(name, input) {
+        const fn = this.tools.get(name.toLowerCase());
+        if (!fn) {
+          throw new Error(`Tool not found: ${name}`);
+        }
+        return fn(input);
+      }
+      availableTools() {
+        return Array.from(this.tools.keys());
+      }
+    }
+
+    class BrainRequest {
+      constructor(assistantName, userInput, intent, context, memories, plan, langKey, modeType) {
+        this.assistantName = assistantName;
+        this.userInput = userInput;
+        this.intent = intent;
+        this.context = context;
+        this.memories = memories;
+        this.plan = plan;
+        this.langKey = langKey;
+        this.modeType = modeType;
+      }
+    }
+
+    class BrainResponse {
+      constructor(message, action, success) {
+        this.message = message;
+        this.action = action;
+        this.success = success;
+      }
+      static success(message, action = null) {
+        return new BrainResponse(message, action, true);
+      }
+      static error(message) {
+        return new BrainResponse(message, null, false);
+      }
+    }
+
+    class SelfCheck {
+      static verify(response) {
+        if (!response) {
+          return BrainResponse.error("No response was generated.");
+        }
+        if (!response.message || !response.message.trim()) {
+          return BrainResponse.error("The response was empty.");
+        }
+        return response;
+      }
+    }
+
+    function solveBasicMath(text) {
+      const normalized = text
+        .replace(/×|x/gi, "*")
+        .replace(/÷/g, "/");
+      const match = normalized.match(/(-?\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(-?\d+(?:\.\d+)?)/);
+      if (!match) return null;
+
+      const a = parseFloat(match[1]);
+      const op = match[2];
+      const b = parseFloat(match[3]);
+
+      if (op === "+") return `${a} + ${b} = ${a + b}`;
+      if (op === "-") return `${a} - ${b} = ${a - b}`;
+      if (op === "*") return `${a} × ${b} = ${a * b}`;
+      if (op === "/") return b === 0 ? "0 se divide nahi ho sakta." : `${a} ÷ ${b} = ${a / b}`;
+      return null;
+    }
+
+    class BasicReasoningEngine {
+      think(request) {
+        const { assistantName, userInput, intent, plan, langKey, modeType, memories } = request;
+        const clean = userInput.trim();
+
+        if (modeType === "explain") {
+          if (langKey === "en-US") {
+            return BrainResponse.success(`Simple breakdown:\n• Topic: "${clean.slice(0, 130)}"\n• Step 1: Break it into clear parts.\n• Step 2: Test it with one example.`);
+          }
+          if (langKey === "hinglish") {
+            return BrainResponse.success(`Aasan shabdon mein:\n• Topic: "${clean.slice(0, 130)}"\n• Step 1: Isko chhote hisson mein baanto.\n• Step 2: Ek example se samjho.`);
+          }
+          return BrainResponse.success(`आसान शब्दों में:\n• विषय: "${clean.slice(0, 130)}"\n• कदम 1: इसे छोटे हिस्सों में बाँटें।\n• कदम 2: किसी उदाहरण से समझें।`);
+        }
+
+        if (modeType === "summarize") {
+          if (langKey === "en-US") {
+            return BrainResponse.success(`Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Keep it short and actionable.`);
+          }
+          if (langKey === "hinglish") {
+            return BrainResponse.success(`Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Baat ko short aur clear rakho.`);
+          }
+          return BrainResponse.success(`संक्षेप:\n• मुख्य बात: "${clean.slice(0, 120)}"\n• इसे छोटा और स्पष्ट रखें।`);
+        }
+
+        if (modeType === "suggestions") {
+          if (langKey === "en-US") {
+            return BrainResponse.success(`Suggestions:\n1. Pick one clear next step.\n2. Test it quickly.\n3. Improve step by step.`);
+          }
+          if (langKey === "hinglish") {
+            return BrainResponse.success(`Suggestions:\n1. Ek clear next step chuno.\n2. Jaldi test karke dekho.\n3. Dheere-dheere improve karo.`);
+          }
+          return BrainResponse.success(`सुझाव:\n1. एक स्पष्ट अगला कदम चुनें।\n2. तुरंत करके देखें।\n3. धीरे-धीरे बेहतर बनाते जाएँ।`);
+        }
+
+        if (modeType === "more") {
+          if (langKey === "en-US") {
+            return BrainResponse.success(`More details:\nPlanned steps for this intent:\n• ${plan.steps.join("\n• ")}`);
+          }
+          if (langKey === "hinglish") {
+            return BrainResponse.success(`Aur details:\nIske liye task steps:\n• ${plan.steps.join("\n• ")}`);
+          }
+          return BrainResponse.success(`अधिक जानकारी:\nइसके चरण:\n• ${plan.steps.join("\n• ")}`);
+        }
+
+        switch (intent) {
+          case Intent.GREETING:
+            if (langKey === "en-US") {
+              return BrainResponse.success(`Hello! I am ${assistantName}. How can I help you?`);
+            }
+            if (langKey === "hinglish") {
+              return BrainResponse.success(`Hello! Main ${assistantName} hoon. Batao kya madad chahiye?`);
+            }
+            return BrainResponse.success(`नमस्ते! मैं ${assistantName} हूँ। बताइए मैं आपकी क्या मदद कर सकता हूँ?`);
+
+          case Intent.CALCULATION: {
+            const solved = solveBasicMath(clean);
+            if (solved) {
+              return BrainResponse.success(solved);
+            }
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? "I detected a calculation request. Please write an expression like 2+2 or 15*4."
+                : "गणित का हिसाब दिखा—कृपया 2+2 या 15*4 जैसा हिसाब लिखें।"
+            );
+          }
+
+          case Intent.MEMORY: {
+            const keys = Object.keys(memories);
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? `Memory system active. Stored keys: ${keys.length ? keys.join(", ") : "none"}.`
+                : `मेमोरी सिस्टम तैयार है। सेव की गई मेमोरी: ${keys.length ? keys.join(", ") : "अभी कोई नहीं"}।`
+            );
+          }
+
+          case Intent.PLANNING:
+            return BrainResponse.success(
+              (langKey === "en-US" ? "Let's organize this into steps:\n" : "इसे इन चरणों में बाँटते हैं:\n") +
+                plan.steps.join("\n")
+            );
+
+          case Intent.CODING:
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? "Coding intent detected. Share what feature or logic you want to build."
+                : "कोडिंग का अनुरोध समझा—बताओ कौन-सा लॉजिक या फ़ीचर बनाना है?"
+            );
+
+          case Intent.RESEARCH:
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? "Research mode detected. Connect a search API/tool for live web results."
+                : "रिसर्च मोड समझा—लाइव वेब जानकारी के लिए सर्च टूल जोड़ना होगा।"
+            );
+
+          case Intent.CREATION:
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? "Creation mode active. Tell me what you want to create."
+                : "क्रिएशन मोड चालू है—बताओ क्या बनाना है?"
+            );
+
+          case Intent.QUESTION:
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? `Got your question: "${clean}". Try Explain or Suggestions chips for deeper help.`
+                : `आपका सवाल समझा: "${clean}"। और मदद के लिए Explain या Suggestions बटन दबाएँ।`
+            );
+
+          default:
+            return BrainResponse.success(
+              langKey === "en-US"
+                ? `I understand your message ("${clean}"). Let's work through it step by step.`
+                : `आपकी बात समझ गया ("${clean}")। इसे चरण-दर-चरण आगे बढ़ाते हैं।`
+            );
+        }
+      }
+    }
+
+    class AIBrain {
+      constructor(assistantName) {
+        this.assistantName = assistantName;
+        this.memory = new MemoryCore();
+        this.context = new ContextCore(20);
+        this.tools = new ToolCore();
+        this.reasoning = new BasicReasoningEngine();
+        this.planner = new Planner();
+      }
+
+      process(userInput, langKey = "hi-IN", modeType = null) {
+        if (!userInput || !userInput.trim()) {
+          return BrainResponse.error("Please provide a message.");
+        }
+
+        const intent = IntentEngine.detect(userInput);
+        const previousContext = this.context.getContext();
+        const memories = this.memory.getAll();
+        const plan = this.planner.createPlan(intent, userInput);
+
+        const request = new BrainRequest(
+          this.assistantName,
+          userInput,
+          intent,
+          previousContext,
+          memories,
+          plan,
+          langKey,
+          modeType
+        );
+
+        let response = this.reasoning.think(request);
+
+        if (response.action && this.tools.hasTool(response.action)) {
+          try {
+            const result = this.tools.execute(response.action, userInput);
+            response = BrainResponse.success(result, response.action);
+          } catch (err) {
+            response = BrainResponse.error(`Tool execution failed: ${err.message}`);
+          }
+        }
+
+        response = SelfCheck.verify(response);
+        this.context.add(userInput, response.message);
+        return response;
+      }
+    }
+
+    // ==================== UI & VOICE INTEGRATION ====================
+
+    const bbBrain = new AIBrain("BB");
+    bbBrain.memory.save("assistant_mode", "Helpful and modular");
+    bbBrain.tools.register("uppercase", (input) => input.toUpperCase());
+
     let currentLangKey = "hi-IN";
     let voiceEnabled = false;
     let wakeWordEnabled = true;
@@ -843,7 +1203,7 @@
     }
 
     function clearChat() {
-      chatMessages.length = 0;
+      bbBrain.context.clear();
       const cfg = getLang();
       chatContainer.innerHTML = "";
       addMessage(cfg.welcome, "ai");
@@ -853,134 +1213,14 @@
       }
     }
 
-    function generateSmartLocalReply(prompt, modeType = null) {
-      const clean = prompt.trim();
-      const lower = clean.toLowerCase();
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const dateStr = now.toLocaleDateString([], {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-      });
-
-      const isGreeting =
-        /^(hi|hii|hiii|hello|hey|namaste|नमस्ते|प्रणाम|yo)\b/i.test(lower);
-      const asksTime =
-        lower.includes("time") || lower.includes("samay") || lower.includes("समय") || lower.includes("baj");
-      const asksDate =
-        lower.includes("date") || lower.includes("aaj") || lower.includes("today") || lower.includes("तारीख");
-      const asksIdentity =
-        lower.includes("kaun ho") || lower.includes("who are you") || lower.includes("tum kaun") || lower.includes("नाम");
-
-      if (modeType === "explain") {
-        if (currentLangKey === "en-US") {
-          return `Simple breakdown:\n• Core idea: "${clean.slice(0, 140)}"\n• Step 1: Break it into small parts.\n• Step 2: Apply it to one real example.\n• Tip: Ask me for a specific example if you want deeper detail.`;
-        }
-        if (currentLangKey === "hinglish") {
-          return `Aasan shabdon mein samajhte hain:\n• Main point: "${clean.slice(0, 140)}"\n• Step 1: Isko chhote-chhote hisson mein baanto.\n• Step 2: Ek real example se jodo.\n• Tip: Agar kisi ek hisse ko aur gehrai se samajhna hai to poochho.`;
-        }
-        return `आसान शब्दों में समझते हैं:\n• मुख्य बात: "${clean.slice(0, 140)}"\n• पहला कदम: इसे छोटे हिस्सों में बाँटें।\n• दूसरा कदम: किसी एक उदाहरण से जोड़कर देखें।\n• सुझाव: किसी खास हिस्से पर और जानकारी चाहिए तो पूछें।`;
-      }
-
-      if (modeType === "summarize") {
-        if (currentLangKey === "en-US") {
-          return `Quick Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Keep actions clear and short.\n• Pick the top priority first.`;
-        }
-        if (currentLangKey === "hinglish") {
-          return `Short Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Kaam ko seedha aur clear rakho.\n• Sabse zaroori point par pehle dhyan do.`;
-        }
-        return `संक्षेप में:\n• विषय: "${clean.slice(0, 120)}"\n• बात को सीधा और स्पष्ट रखें।\n• सबसे ज़रूरी बिंदु पर पहले ध्यान दें।`;
-      }
-
-      if (modeType === "suggestions") {
-        if (currentLangKey === "en-US") {
-          return `4 Smart Suggestions:\n1. Set one clear goal for the next 30 minutes.\n2. Remove distractions while working.\n3. Test ideas quickly with small steps.\n4. Review what worked best today.`;
-        }
-        if (currentLangKey === "hinglish") {
-          return `4 Smart Suggestions:\n1. Agle 30 minute ke liye ek clear goal set karo.\n2. Kaam karte waqt distractions kam rakho.\n3. Chhote steps se jaldi test karke dekho.\n4. Din ke end mein dekho kya best kaam kiya.`;
-        }
-        return `4 उपयोगी सुझाव:\n1. अगले 30 मिनट के लिए एक स्पष्ट लक्ष्य तय करें।\n2. काम करते समय ध्यान भटकाने वाली चीज़ें दूर रखें।\n3. छोटे कदमों से तुरंत प्रयोग करके देखें।\n4. आखिर में देखें कि कौन-सा तरीका सबसे अच्छा रहा।`;
-      }
-
-      if (modeType === "more") {
-        if (currentLangKey === "en-US") {
-          return `Extra details & example:\nThink of it like building a clean routine—consistency beats intensity. Start with a small 5-minute action, refine it, and build momentum.`;
-        }
-        if (currentLangKey === "hinglish") {
-          return `Extra details aur example:\nIsko ek achhi routine ki tarah samjho—regularity sabse zaroori hai. 5 minute ke chhote step se shuru karo aur dheere-dheere speed badhao.`;
-        }
-        return `अतिरिक्त जानकारी और उदाहरण:\nइसे एक अच्छी आदत की तरह समझें—निरंतरता सबसे ज़रूरी है। 5 मिनट के छोटे कदम से शुरुआत करें और धीरे-धीरे आगे बढ़ाएँ।`;
-      }
-
-      if (isGreeting) {
-        if (currentLangKey === "en-US") return `Hey there! I'm BB Assistant. How can I help you today?`;
-        if (currentLangKey === "hinglish") return `Hey! Main BB Assistant hoon. Batao aaj kya madad chahiye?`;
-        return `नमस्ते! मैं BB Assistant हूँ। बताइए आज मैं आपकी क्या मदद कर सकता हूँ?`;
-      }
-
-      if (asksIdentity) {
-        if (currentLangKey === "en-US") return `I am BB, your smart voice & chat assistant built right into this web app.`;
-        if (currentLangKey === "hinglish") return `Main BB hoon—tumhara smart voice aur chat assistant.`;
-        return `मैं BB हूँ—आपका स्मार्ट वॉइस और चैट असिस्टेंट।`;
-      }
-
-      if (asksTime) {
-        if (currentLangKey === "en-US") return `Current time is ${timeStr}.`;
-        if (currentLangKey === "hinglish") return `Abhi ${timeStr} baj rahe hain.`;
-        return `अभी समय ${timeStr} हुआ है।`;
-      }
-
-      if (asksDate) {
-        if (currentLangKey === "en-US") return `Today is ${dateStr}.`;
-        if (currentLangKey === "hinglish") return `Aaj ${dateStr} hai.`;
-        return `आज दिनांक ${dateStr} है।`;
-      }
-
-      if (currentLangKey === "en-US") {
-        return `Got it—you asked about "${clean}".\nHere is a helpful take: break the task into clear steps, start with the most important part, and ask me to Explain, Summarize, or give Suggestions anytime.`;
-      }
-      if (currentLangKey === "hinglish") {
-        return `Samajh gaya—tumne "${clean}" ke baare mein poocha hai.\nIske liye sabse achha tareeka yeh hai ki isko clear steps mein baanto, main part se shuru karo, aur zaroorat pade to Explain, Summarize ya Suggestions wale chips use karo.`;
-      }
-      return `समझ गया—आपने "${clean}" के बारे में पूछा है।\nइसे आसान बनाने के लिए इसे स्पष्ट हिस्सों में बाँटें, मुख्य हिस्से से शुरुआत करें, और ज़रूरत पड़ने पर Explain, Summarize या Suggestions बटन का उपयोग करें।`;
-    }
-
-    async function fetchChatGPTReply(cfg) {
-      const response = await fetch(OPENAI_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: OPENAI_MODEL,
-          messages: [
-            { role: "system", content: cfg.systemPrompt },
-            ...chatMessages
-          ]
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
-      }
-
-      return data?.choices?.[0]?.message?.content?.trim() || "";
-    }
-
     function quickPrompt(type) {
-      const lastUser = [...chatMessages].reverse().find((m) => m.role === "user");
-      const lastContext = lastUser?.content || "Aaj ke kaam aur seekhne ka tareeka";
-
+      const lastContext = bbBrain.context.getLastUserMessage() || "Aaj ke kaam aur seekhne ka tareeka";
       const labels = {
         explain: currentLangKey === "en-US" ? `Explain: ${lastContext}` : `Explain karo: ${lastContext}`,
         summarize: currentLangKey === "en-US" ? `Summarize: ${lastContext}` : `Summarize karo: ${lastContext}`,
         suggestions: currentLangKey === "en-US" ? `Suggestions for: ${lastContext}` : `Suggestions do: ${lastContext}`,
         more: currentLangKey === "en-US" ? `More on: ${lastContext}` : `Aur details do: ${lastContext}`
       };
-
       sendMessage(labels[type] || labels.explain, type);
     }
 
@@ -991,7 +1231,7 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
       } else if (tab === "history") {
         document.getElementById("navHistory").classList.add("active");
-        addSystemNote(`Total messages in session: ${chatMessages.length}`);
+        addSystemNote(`Context items: ${bbBrain.context.history.length}`);
       } else if (tab === "tools") {
         document.getElementById("navTools").classList.add("active");
         openSettings();
@@ -1036,7 +1276,6 @@
       };
 
       wakeRecognizer.onerror = () => {};
-
       wakeRecognizer.onend = () => {
         if (wakeWordEnabled && !isRecordingCommand && !isSending) {
           setTimeout(() => restartWakeListener(), 350);
@@ -1132,8 +1371,6 @@
       stopWakeListener();
 
       addMessage(prompt, "user");
-      chatMessages.push({ role: "user", content: prompt });
-
       msgInput.value = "";
       msgInput.disabled = true;
       micBtn.disabled = true;
@@ -1142,26 +1379,13 @@
       const loadingBubble = addMessage(cfg.thinking, "ai");
 
       try {
-        let replyText = "";
-
-        if (OPENAI_API_KEY) {
-          replyText = (await fetchChatGPTReply(cfg)) || generateSmartLocalReply(prompt, modeType);
-        } else {
-          await new Promise((r) => setTimeout(r, 320));
-          replyText = generateSmartLocalReply(prompt, modeType);
-        }
+        await new Promise((r) => setTimeout(r, 240));
+        const brainResult = bbBrain.process(prompt, currentLangKey, modeType);
+        const replyText = brainResult.message;
 
         loadingBubble.textContent = replyText;
-        chatMessages.push({ role: "assistant", content: replyText });
-
         statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
         speakReply(replyText);
-      } catch (error) {
-        const fallbackReply = generateSmartLocalReply(prompt, modeType);
-        loadingBubble.textContent = fallbackReply;
-        chatMessages.push({ role: "assistant", content: fallbackReply });
-        statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
-        speakReply(fallbackReply);
       } finally {
         isSending = false;
         msgInput.disabled = false;
