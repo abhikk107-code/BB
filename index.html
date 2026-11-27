@@ -664,12 +664,10 @@
   </div>
 
   <script>
-    // Agar future mein valid Gemini key mile to yahan daal sakte ho; warna Smart Local Brain automatically kaam karega.
-    const API_KEY = "";
-    const MODEL_NAME = "gemini-flash-latest";
-    const ENDPOINT = API_KEY
-      ? `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`
-      : "";
+    // Agar OpenAI ChatGPT API key ho to yahan daalein; khali rakhne par Smart Local Brain chalega.
+    const OPENAI_API_KEY = "";
+    const OPENAI_MODEL = "gpt-4o-mini";
+    const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
     const LANG_CONFIG = {
       "hi-IN": {
@@ -716,7 +714,8 @@
       }
     };
 
-    const conversationHistory = [];
+    // OpenAI format history: { role: "user" | "assistant", content: "..." }
+    const chatMessages = [];
     let currentLangKey = "hi-IN";
     let voiceEnabled = false;
     let wakeWordEnabled = true;
@@ -844,7 +843,7 @@
     }
 
     function clearChat() {
-      conversationHistory.length = 0;
+      chatMessages.length = 0;
       const cfg = getLang();
       chatContainer.innerHTML = "";
       addMessage(cfg.welcome, "ai");
@@ -854,7 +853,6 @@
       }
     }
 
-    // Smart Local Brain for instant replies without API key errors
     function generateSmartLocalReply(prompt, modeType = null) {
       const clean = prompt.trim();
       const lower = clean.toLowerCase();
@@ -916,22 +914,14 @@
       }
 
       if (isGreeting) {
-        if (currentLangKey === "en-US") {
-          return `Hey there! I'm BB Assistant. How can I help you today?`;
-        }
-        if (currentLangKey === "hinglish") {
-          return `Hey! Main BB Assistant hoon. Batao aaj kya madad chahiye?`;
-        }
+        if (currentLangKey === "en-US") return `Hey there! I'm BB Assistant. How can I help you today?`;
+        if (currentLangKey === "hinglish") return `Hey! Main BB Assistant hoon. Batao aaj kya madad chahiye?`;
         return `नमस्ते! मैं BB Assistant हूँ। बताइए आज मैं आपकी क्या मदद कर सकता हूँ?`;
       }
 
       if (asksIdentity) {
-        if (currentLangKey === "en-US") {
-          return `I am BB, your smart voice & chat assistant built right into this web app.`;
-        }
-        if (currentLangKey === "hinglish") {
-          return `Main BB hoon—tumhara smart voice aur chat assistant.`;
-        }
+        if (currentLangKey === "en-US") return `I am BB, your smart voice & chat assistant built right into this web app.`;
+        if (currentLangKey === "hinglish") return `Main BB hoon—tumhara smart voice aur chat assistant.`;
         return `मैं BB हूँ—आपका स्मार्ट वॉइस और चैट असिस्टेंट।`;
       }
 
@@ -947,7 +937,6 @@
         return `आज दिनांक ${dateStr} है।`;
       }
 
-      // General intelligent response tailored to selected language
       if (currentLangKey === "en-US") {
         return `Got it—you asked about "${clean}".\nHere is a helpful take: break the task into clear steps, start with the most important part, and ask me to Explain, Summarize, or give Suggestions anytime.`;
       }
@@ -957,9 +946,33 @@
       return `समझ गया—आपने "${clean}" के बारे में पूछा है।\nइसे आसान बनाने के लिए इसे स्पष्ट हिस्सों में बाँटें, मुख्य हिस्से से शुरुआत करें, और ज़रूरत पड़ने पर Explain, Summarize या Suggestions बटन का उपयोग करें।`;
     }
 
+    async function fetchChatGPTReply(cfg) {
+      const response = await fetch(OPENAI_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          messages: [
+            { role: "system", content: cfg.systemPrompt },
+            ...chatMessages
+          ]
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
+      }
+
+      return data?.choices?.[0]?.message?.content?.trim() || "";
+    }
+
     function quickPrompt(type) {
-      const lastUser = [...conversationHistory].reverse().find((m) => m.role === "user");
-      const lastContext = lastUser?.parts?.[0]?.text || "Aaj ke kaam aur seekhne ka tareeka";
+      const lastUser = [...chatMessages].reverse().find((m) => m.role === "user");
+      const lastContext = lastUser?.content || "Aaj ke kaam aur seekhne ka tareeka";
 
       const labels = {
         explain: currentLangKey === "en-US" ? `Explain: ${lastContext}` : `Explain karo: ${lastContext}`,
@@ -978,7 +991,7 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
       } else if (tab === "history") {
         document.getElementById("navHistory").classList.add("active");
-        addSystemNote(`Total messages in session: ${conversationHistory.length}`);
+        addSystemNote(`Total messages in session: ${chatMessages.length}`);
       } else if (tab === "tools") {
         document.getElementById("navTools").classList.add("active");
         openSettings();
@@ -1119,10 +1132,7 @@
       stopWakeListener();
 
       addMessage(prompt, "user");
-      conversationHistory.push({
-        role: "user",
-        parts: [{ text: prompt }]
-      });
+      chatMessages.push({ role: "user", content: prompt });
 
       msgInput.value = "";
       msgInput.disabled = true;
@@ -1134,46 +1144,22 @@
       try {
         let replyText = "";
 
-        if (API_KEY) {
-          const response = await fetch(ENDPOINT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: cfg.systemPrompt }] },
-              contents: conversationHistory
-            })
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
-          }
-
-          replyText =
-            data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-            generateSmartLocalReply(prompt, modeType);
+        if (OPENAI_API_KEY) {
+          replyText = (await fetchChatGPTReply(cfg)) || generateSmartLocalReply(prompt, modeType);
         } else {
           await new Promise((r) => setTimeout(r, 320));
           replyText = generateSmartLocalReply(prompt, modeType);
         }
 
         loadingBubble.textContent = replyText;
-        conversationHistory.push({
-          role: "model",
-          parts: [{ text: replyText }]
-        });
+        chatMessages.push({ role: "assistant", content: replyText });
 
         statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
         speakReply(replyText);
       } catch (error) {
-        // Fallback smoothly to Smart Local Brain if API request fails
         const fallbackReply = generateSmartLocalReply(prompt, modeType);
         loadingBubble.textContent = fallbackReply;
-        conversationHistory.push({
-          role: "model",
-          parts: [{ text: fallbackReply }]
-        });
+        chatMessages.push({ role: "assistant", content: fallbackReply });
         statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
         speakReply(fallbackReply);
       } finally {
