@@ -1,529 +1,1083 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BB AI Assistant</title>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    :root {
+      --bg-top: #070b1a;
+      --bg-bottom: #050814;
+      --card: rgba(16, 23, 46, 0.88);
+      --card-solid: #111830;
+      --border-glow: rgba(78, 124, 255, 0.45);
+      --border-subtle: rgba(120, 150, 255, 0.18);
+      --text: #f3f6ff;
+      --muted: #9aa7cc;
+      --user-grad: linear-gradient(135deg, #1b4dff 0%, #0d2b9c 100%);
+      --ai-bg: rgba(20, 27, 52, 0.92);
+      --accent: #4f7cff;
+      --purple-send: linear-gradient(135deg, #5e60ff 0%, #8a4fff 100%);
+      --green: #18d47c;
+      --danger: #ff4757;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
-      background: #0b0f19;
-      color: #f1f5f9;
+      background: radial-gradient(circle at 50% 0%, #132152 0%, var(--bg-top) 45%, var(--bg-bottom) 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
       display: flex;
       justify-content: center;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 12px 0;
+      position: relative;
+    }
+
+    /* Animations */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes floatBot {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes blinkEyes {
+      0%, 92%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.12); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(79, 124, 255, 0.28); }
+      50% { box-shadow: 0 0 22px rgba(122, 92, 255, 0.45); }
+    }
+
+    @keyframes micPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.65); }
+      70% { box-shadow: 0 0 0 11px rgba(255, 71, 87, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+    }
+
+    /* Header Card */
+    .header-card {
+      background: var(--card);
+      border: 1px solid var(--border-glow);
+      border-radius: 22px;
+      padding: 12px 14px;
+      display: flex;
       align-items: center;
-      padding: 16px;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(79, 124, 255, 0.14);
+      animation: fadeSlideUp 0.35s ease;
     }
-    .card {
-      width: 100%;
-      max-width: 420px;
-      background: #141b2d;
-      border: 1px solid #26314d;
-      border-radius: 20px;
-      padding: 22px;
-      text-align: center;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-    }
-    .lang-bar {
+
+    .brand-left {
       display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 11px;
     }
-    .lang-btn {
-      width: auto;
-      padding: 6px 12px;
+
+    .bot-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #1b2c5c, #0d1530);
+      border: 1px solid rgba(114, 158, 255, 0.55);
+      display: grid;
+      place-items: center;
+      animation: floatBot 3s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .bot-avatar svg {
+      width: 34px;
+      height: 34px;
+    }
+
+    .bot-eyes {
+      transform-origin: center;
+      animation: blinkEyes 4.2s infinite;
+    }
+
+    .brand-info h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-info p {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .settings-btn {
+      background: rgba(27, 39, 75, 0.9);
+      color: var(--text);
+      border: 1px solid var(--border-glow);
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      background: #0f172a;
-      color: #94a3b8;
-      border: 1px solid #26314d;
-    }
-    .lang-btn.active {
-      background: #0284c7;
-      color: #ffffff;
-      border-color: #38bdf8;
-    }
-    h1 { margin: 0 0 6px; font-size: 24px; color: #38bdf8; }
-    p.sub { margin: 0 0 18px; font-size: 13px; color: #94a3b8; }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: #fff;
-      font-size: 16px;
-      text-align: center;
-      margin-bottom: 12px;
-      outline: none;
-    }
-    input:focus {
-      border-color: #38bdf8;
-    }
-    button {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.15s ease, background 0.2s ease;
     }
-    button:active {
-      transform: scale(0.99);
+
+    .settings-btn:hover {
+      background: rgba(42, 61, 117, 0.95);
     }
-    .btn-primary { background: #0284c7; color: #fff; }
-    .btn-on { background: #16a34a; color: #fff; }
-    .btn-off { background: #dc2626; color: #fff; }
-    .orb {
-      width: 104px;
-      height: 104px;
-      margin: 16px auto;
+
+    .settings-btn:active {
+      transform: scale(0.96);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.74rem;
+      color: #b7c6eb;
+      max-width: 170px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dot-online {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: radial-gradient(circle, #38bdf8, #1d4ed8);
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.35);
-      transition: 0.3s;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      flex-shrink: 0;
     }
-    .orb.active {
-      background: radial-gradient(circle, #4ade80, #15803d);
-      box-shadow: 0 0 35px rgba(74, 222, 128, 0.7);
-      transform: scale(1.06);
+
+    /* Action Row (Voice & Clear Chat) */
+    .top-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+      animation: fadeSlideUp 0.4s ease;
     }
-    .orb.listening {
-      box-shadow: 0 0 46px rgba(56, 189, 248, 0.95);
-      transform: scale(1.13);
+
+    .pill-btn {
+      background: rgba(16, 24, 48, 0.85);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s ease;
     }
-    .status {
-      font-size: 14px;
-      margin: 10px 0 14px;
-      color: #cbd5e1;
-      min-height: 20px;
+
+    .pill-btn:hover {
+      border-color: var(--border-glow);
+      background: rgba(24, 36, 72, 0.95);
     }
-    .log-box {
-      margin-top: 16px;
-      background: #0f172a;
-      border-radius: 12px;
-      padding: 12px;
-      text-align: left;
-      font-size: 14px;
-      height: 145px;
+
+    .pill-btn:active {
+      transform: scale(0.97);
+    }
+
+    .pill-btn.active {
+      border-color: rgba(24, 212, 124, 0.65);
+      box-shadow: 0 0 14px rgba(24, 212, 124, 0.2);
+      color: #8df5c3;
+    }
+
+    /* Chat Area */
+    .chat-container {
+      flex: 1;
       overflow-y: auto;
-      border: 1px solid #1e293b;
+      padding: 14px 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
     }
-    .log-item {
-      margin-top: 6px;
-      line-height: 1.4;
-      word-wrap: break-word;
+
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      animation: fadeSlideUp 0.28s ease;
     }
-    .log-item:first-child {
-      margin-top: 0;
+
+    .msg-row.user {
+      justify-content: flex-end;
     }
-    .hidden { display: none; }
+
+    .msg-row.ai {
+      justify-content: flex-start;
+    }
+
+    .mini-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #14224a;
+      border: 1px solid var(--border-glow);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 0.85rem;
+    }
+
+    .msg-wrapper {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+
+    .msg-row.user .msg-wrapper {
+      align-items: flex-end;
+    }
+
+    .msg-row.ai .msg-wrapper {
+      align-items: flex-start;
+    }
+
+    .bubble {
+      padding: 11px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg-row.user .bubble {
+      background: var(--user-grad);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 6px 18px rgba(27, 77, 255, 0.3);
+    }
+
+    .msg-row.ai .bubble {
+      background: var(--ai-bg);
+      color: var(--text);
+      border: 1px solid var(--border-glow);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .msg-meta {
+      margin-top: 4px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 4px;
+    }
+
+    .ticks {
+      color: #5ca4ff;
+      font-weight: 700;
+    }
+
+    .system-pill {
+      align-self: center;
+      font-size: 0.76rem;
+      color: var(--muted);
+      background: rgba(20, 29, 58, 0.75);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 12px;
+      border-radius: 999px;
+      animation: fadeSlideUp 0.25s ease;
+    }
+
+    /* Quick Action Chips */
+    .quick-chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      padding: 4px 0 8px;
+    }
+
+    .chip {
+      background: rgba(16, 24, 48, 0.9);
+      border: 1px solid var(--border-glow);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.18s ease;
+    }
+
+    .chip:hover {
+      background: rgba(35, 53, 107, 0.95);
+      transform: translateY(-1px);
+    }
+
+    /* Input Bar */
+    .input-box {
+      background: rgba(15, 22, 45, 0.95);
+      border: 1.5px solid var(--border-glow);
+      border-radius: 999px;
+      padding: 6px 8px 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: glowPulse 3.5s infinite;
+      margin-bottom: 10px;
+    }
+
+    .sparkle-icon {
+      color: #849bff;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    #msgInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.92rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    #msgInput::placeholder {
+      color: var(--muted);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 0.95rem;
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+    }
+
+    #micBtn {
+      background: rgba(36, 51, 96, 0.9);
+      color: #dbe6ff;
+      border: 1px solid rgba(118, 155, 255, 0.35);
+    }
+
+    #micBtn.listening {
+      background: var(--danger);
+      color: #fff;
+      animation: micPulse 1.2s infinite;
+    }
+
+    #sendBtn {
+      background: var(--purple-send);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(112, 86, 255, 0.45);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      background: #070b18;
+      border-top: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 8px 6px 10px;
+    }
+
+    .nav-item {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.18s ease, transform 0.15s ease;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Settings Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 16, 0.72);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 390px;
+      background: var(--card-solid);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      animation: fadeSlideUp 0.22s ease;
+    }
+
+    .modal-card h2 {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+    }
+
+    .setting-row {
+      margin-bottom: 14px;
+    }
+
+    .setting-row label {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #0a1024;
+      color: var(--text);
+      border: 1px solid var(--border-glow);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a1024;
+      border: 1px solid var(--border-subtle);
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .toggle-btn {
+      background: #223263;
+      color: #fff;
+      border: 1px solid var(--border-glow);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toggle-btn.on {
+      background: #148f56;
+      border-color: #2ce68f;
+    }
+
+    .close-modal-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: var(--user-grad);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div class="phone-shell">
+    <div>
+      <!-- Top Header Card -->
+      <header class="header-card">
+        <div class="brand-left">
+          <div class="bot-avatar" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <rect x="9" y="12" width="30" height="24" rx="10" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2.2"/>
+              <line x1="24" y1="5" x2="24" y2="12" stroke="#60a5fa" stroke-width="2.4" stroke-linecap="round"/>
+              <circle cx="24" cy="4.5" r="2.5" fill="#38bdf8"/>
+              <g class="bot-eyes">
+                <circle cx="18.5" cy="23.5" r="2.6" fill="#7dd3fc"/>
+                <circle cx="29.5" cy="23.5" r="2.6" fill="#7dd3fc"/>
+              </g>
+              <path d="M19 29.5C20.5 31.5 27.5 31.5 29 29.5" stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="brand-info">
+            <h1>BB Assistant</h1>
+            <p id="subTitle">Your smart companion ✨</p>
+          </div>
+        </div>
 
-  <!-- PIN Lock Screen -->
-  <div class="card" id="lockScreen">
-    <div class="lang-bar">
-      <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
-      <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')"></button>
-      <button type="button" class="lang-btn" data-lang="hinglish" onclick="setLanguage('hinglish')">Hinglish</button>
+        <div class="header-right">
+          <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+          <div class="status-pill">
+            <span class="dot-online"></span>
+            <span id="statusText">Online • "Hey BB"</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Voice & Clear Chat Row -->
+      <div class="top-actions">
+        <button id="voiceBtn" class="pill-btn" onclick="toggleVoice()">
+          <span>🔊</span>
+          <span id="voiceLabel">Voice: Off</span>
+        </button>
+        <button id="clearBtn" class="pill-btn" onclick="clearChat()">
+          <span>🗑️</span>
+          <span id="clearLabel">Clear Chat</span>
+        </button>
+      </div>
     </div>
 
-    <h1 id="lockTitle">BB Control Lock</h1>
-    <p class="sub" id="lockSub">Enter your private PIN (default: 1234)</p>
-    <input type="password" inputmode="numeric" id="pinInput" placeholder="Enter PIN" maxlength="8" />
-    <button type="button" class="btn-primary" id="unlockBtn" onclick="unlockApp()">Unlock</button>
-    <p class="status" id="pinError" style="color:#f87171;"></p>
+    <!-- Chat Messages -->
+    <main id="chatContainer" class="chat-container"></main>
+
+    <!-- Bottom Controls -->
+    <div>
+      <div class="quick-chips">
+        <button class="chip" onclick="quickPrompt('explain')">⭐ Explain</button>
+        <button class="chip" onclick="quickPrompt('summarize')">⚡ Summarize</button>
+        <button class="chip" onclick="quickPrompt('suggestions')">💡 Suggestions</button>
+        <button class="chip" onclick="quickPrompt('more')">••• More</button>
+      </div>
+
+      <div class="input-box">
+        <span class="sparkle-icon">✦</span>
+        <input
+          id="msgInput"
+          type="text"
+          placeholder="Type your message..."
+          onkeydown="handleKey(event)"
+        />
+        <button id="micBtn" class="icon-btn" title="Speak" onclick="startCommandListening()">🎤</button>
+        <button id="sendBtn" class="icon-btn" title="Send" onclick="sendMessage()">➤</button>
+      </div>
+
+      <nav class="bottom-nav">
+        <button id="navChat" class="nav-item active" onclick="switchTab('chat')">
+          <span>💬</span>
+          <span>Chat</span>
+        </button>
+        <button id="navHistory" class="nav-item" onclick="switchTab('history')">
+          <span>🕒</span>
+          <span>History</span>
+        </button>
+        <button id="navTools" class="nav-item" onclick="switchTab('tools')">
+          <span>⊞</span>
+          <span>Tools</span>
+        </button>
+      </nav>
+    </div>
   </div>
 
-  <!-- Main BB Assistant Screen -->
-  <div class="card hidden" id="appScreen">
-    <div class="lang-bar">
-      <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
-      <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')"></button>
-      <button type="button" class="lang-btn" data-lang="hinglish" onclick="setLanguage('hinglish')">Hinglish</button>
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop" onclick="backdropClose(event)">
+    <div class="modal-card">
+      <h2>Assistant Settings</h2>
+
+      <div class="setting-row">
+        <label for="langSelect">Language / भाषा</label>
+        <select id="langSelect" onchange="changeLanguage()">
+          <option value="hi-IN" selected>हिंदी (Hindi)</option>
+          <option value="hinglish">Hinglish</option>
+          <option value="en-US">English</option>
+        </select>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div style="font-size: 0.9rem; font-weight: 600;">Wake Word: "Hey BB"</div>
+          <div style="font-size: 0.75rem; color: var(--muted);">Bolte hi mic on ho jayega</div>
+        </div>
+        <button id="wakeToggleBtn" class="toggle-btn on" onclick="toggleWakeWord()">On</button>
+      </div>
+
+      <button class="close-modal-btn" onclick="closeSettings()">Done</button>
     </div>
-
-    <h1 id="appTitle">BB Assistant</h1>
-    <p class="sub" id="appSub">Your personal voice assistant</p>
-
-    <div class="orb" id="orb"></div>
-    <div class="status" id="statusText">BB is currently OFF</div>
-
-    <button type="button" class="btn-on" id="powerBtn" onclick="toggleBB()">Turn BB ON</button>
-
-    <div class="log-box" id="chatLog"></div>
   </div>
 
   <script>
-    const OWNER_PIN = "1234";
-    const STORAGE_KEY = "bb_assistant_lang";
+    const API_KEY = "AQ.Ab8RN6J26z098z2cxYYT-7wzLgkOOgjGfe_ZZIJA4rK5oJepRQ";
+    const MODEL_NAME = "gemini-2.5-flash";
+    const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
-    const I18N = {
-      en: {
-        htmlLang: "en",
+    const LANG_CONFIG = {
+      "hi-IN": {
+        speechLang: "hi-IN",
+        placeholder: "अपना संदेश लिखें या 'Hey BB' बोलें...",
+        voiceOff: "Voice: Off",
+        voiceOn: "Voice: On",
+        clearChat: "Clear Chat",
+        welcome: 'नमस्ते! मैं BB हूँ। बोलने के लिए "Hey BB" कहें या Mic बटन दबाएँ।',
+        clearedNote: "चैट साफ़ कर दी गई है।",
+        thinking: "सोच रहा हूँ...",
+        listeningCmd: 'सुन रहा हूँ... सवाल बोलें',
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt:
+          "Tum BB ho, ek helpful, clear aur friendly AI assistant. Hamesha saral aur clear Hindi mein jawab do."
+      },
+      "hinglish": {
+        speechLang: "hi-IN",
+        placeholder: "Type your message or say 'Hey BB'...",
+        voiceOff: "Voice: Off",
+        voiceOn: "Voice: On",
+        clearChat: "Clear Chat",
+        welcome: 'Namaste! Main BB hoon. Mic on karne ke liye "Hey BB" bolein ya mic icon dabayein.',
+        clearedNote: "Chat clear kar di gayi hai.",
+        thinking: "Soch raha hoon...",
+        listeningCmd: "Sun raha hoon... sawal bolein",
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt:
+          "Tum BB ho, ek helpful, clear aur friendly AI assistant. Hamesha Hinglish (Roman Hindi) mein jawab do."
+      },
+      "en-US": {
         speechLang: "en-US",
-        lockTitle: "BB Control Lock",
-        lockSub: "Enter your private PIN (default: 1234)",
-        pinPlaceholder: "Enter PIN",
-        unlockBtn: "Unlock",
-        wrongPin: "Incorrect PIN! Only the owner can unlock.",
-        appTitle: "BB Assistant",
-        appSub: "Your personal voice assistant",
-        bbName: "BB",
-        userName: "You",
-        readyLog: "System is ready. Turn BB ON to start talking.",
-        offStatus: "BB is currently OFF",
-        onStatus: "BB is ON  Speak anytime",
-        listeningStatus: "Listening... Speak now",
-        micBlockedError: "Microphone permission blocked or unavailable.",
-        turnOnBtn: "Turn BB ON",
-        turnOffBtn: "Turn BB OFF",
-        onlineReply: "BB is online. Listening now, tell me what to do.",
-        offReply: "System has been turned off.",
-        noSpeechSupport: "Voice recognition is not supported in this browser. Please use Google Chrome.",
-        wakeReply: "Yes, I am listening! What should I do?",
-        greetingReply: "Hello! I am BB, ready to help you.",
-        timePrefix: "Current time is ",
-        youtubeReply: "Opening YouTube.",
-        googleReply: "Opening Google.",
-        fallbackPrefix: "You said: ",
-        fallbackSuffix: ". I am still learning this."
-      },
-      hi: {
-        htmlLang: "hi",
-        speechLang: "hi-IN",
-        lockTitle: "BB  ",
-        lockSub: "  PIN  (: 1234)",
-        pinPlaceholder: "PIN ",
-        unlockBtn: " ",
-        wrongPin: " PIN!      ",
-        appTitle: "BB Assistant",
-        appSub: "   ",
-        bbName: "BB",
-        userName: "",
-        readyLog: "        BB  ON ",
-        offStatus: "BB  OFF ",
-        onStatus: "BB ON    ",
-        listeningStatus: "  ... ",
-        micBlockedError: "        ",
-        turnOnBtn: "BB  ON ",
-        turnOffBtn: "BB  OFF ",
-        onlineReply: "BB      ,    ?",
-        offReply: "     ",
-        noSpeechSupport: "        Google Chrome  ",
-        wakeReply: ",    !   ?",
-        greetingReply: "!  BB ,     ",
-        timePrefix: "   ",
-        youtubeReply: "YouTube   ",
-        googleReply: "Google   ",
-        fallbackPrefix: " : ",
-        fallbackSuffix: "     "
-      },
-      hinglish: {
-        htmlLang: "en-IN",
-        speechLang: "hi-IN",
-        lockTitle: "BB Control Lock",
-        lockSub: "Apna private PIN enter karein (default: 1234)",
-        pinPlaceholder: "PIN enter karein",
-        unlockBtn: "Unlock Karein",
-        wrongPin: "Galat PIN! Sirf owner hi unlock kar sakta hai.",
-        appTitle: "BB Assistant",
-        appSub: "Aapka personal voice assistant",
-        bbName: "BB",
-        userName: "Aap",
-        readyLog: "System ready hai. Baat shuru karne ke liye BB ko ON karein.",
-        offStatus: "BB abhi OFF hai",
-        onStatus: "BB ON hai  seedha bolein",
-        listeningStatus: "Sun raha hoon... boliye",
-        micBlockedError: "Mic permission block hai ya available nahi hai.",
-        turnOnBtn: "BB ko ON Karein",
-        turnOffBtn: "BB ko OFF Karein",
-        onlineReply: "BB online hai. Sun raha hoon, bataiye kya karna hai?",
-        offReply: "System OFF kar diya gaya hai.",
-        noSpeechSupport: "Is browser mein voice recognition support nahi hai. Google Chrome use karein.",
-        wakeReply: "Haan, main sun raha hoon! Bataiye kya karoon?",
-        greetingReply: "Hello! Main BB hoon, aapki help ke liye ready hoon.",
-        timePrefix: "Abhi time hua hai ",
-        youtubeReply: "YouTube open kar raha hoon.",
-        googleReply: "Google open kar raha hoon.",
-        fallbackPrefix: "Aapne kaha: ",
-        fallbackSuffix: ". Main isko seekh raha hoon."
+        placeholder: "Type your message...",
+        voiceOff: "Voice: Off",
+        voiceOn: "Voice: On",
+        clearChat: "Clear Chat",
+        welcome: 'Hello! I am BB. Say "Hey BB" or tap the mic to start speaking.',
+        clearedNote: "Chat cleared.",
+        thinking: "Thinking...",
+        listeningCmd: "Listening... speak now",
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt:
+          "You are BB, a helpful, clear, and smart AI assistant. Always answer clearly in English."
       }
     };
 
-    let currentLang = localStorage.getItem(STORAGE_KEY) || "en";
-    if (!I18N[currentLang]) currentLang = "en";
+    const conversationHistory = [];
+    let currentLangKey = "hi-IN";
+    let voiceEnabled = false;
+    let wakeWordEnabled = true;
+    let isRecordingCommand = false;
+    let isSending = false;
 
-    let isBBOn = false;
-    let isListening = false;
-    let restartTimer = null;
+    const chatContainer = document.getElementById("chatContainer");
+    const msgInput = document.getElementById("msgInput");
+    const micBtn = document.getElementById("micBtn");
+    const voiceBtn = document.getElementById("voiceBtn");
+    const voiceLabel = document.getElementById("voiceLabel");
+    const clearLabel = document.getElementById("clearLabel");
+    const statusText = document.getElementById("statusText");
+    const langSelect = document.getElementById("langSelect");
+    const wakeToggleBtn = document.getElementById("wakeToggleBtn");
+    const settingsModal = document.getElementById("settingsModal");
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    let wakeRecognizer = null;
+    let commandRecognizer = null;
 
-    function t() {
-      return I18N[currentLang];
+    function getLang() {
+      return LANG_CONFIG[currentLangKey] || LANG_CONFIG["hi-IN"];
     }
 
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+    function nowTime() {
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
-    function addLog(sender, msg) {
-      const box = document.getElementById("chatLog");
-      const item = document.createElement("div");
-      item.className = "log-item";
-      item.innerHTML = `<strong>${escapeHtml(sender)}:</strong> ${escapeHtml(msg)}`;
-      box.appendChild(item);
-      box.scrollTop = box.scrollHeight;
+    function addSystemNote(text) {
+      const div = document.createElement("div");
+      div.className = "system-pill";
+      div.textContent = text;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    function clearRestartTimer() {
-      if (restartTimer) {
-        clearTimeout(restartTimer);
-        restartTimer = null;
+    function addMessage(text, sender) {
+      const row = document.createElement("div");
+      row.className = `msg-row ${sender}`;
+
+      if (sender === "ai") {
+        const av = document.createElement("div");
+        av.className = "mini-avatar";
+        av.textContent = "🤖";
+        row.appendChild(av);
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "msg-wrapper";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      const meta = document.createElement("div");
+      meta.className = "msg-meta";
+      meta.innerHTML =
+        sender === "user"
+          ? `<span>${nowTime()}</span><span class="ticks">✓✓</span>`
+          : `<span>${nowTime()}</span>`;
+
+      wrapper.appendChild(bubble);
+      wrapper.appendChild(meta);
+      row.appendChild(wrapper);
+
+      if (sender === "user") {
+        const uAv = document.createElement("div");
+        uAv.className = "mini-avatar";
+        uAv.textContent = "👤";
+        row.appendChild(uAv);
+      }
+
+      chatContainer.appendChild(row);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return bubble;
+    }
+
+    function openSettings() {
+      settingsModal.classList.add("open");
+    }
+
+    function closeSettings() {
+      settingsModal.classList.remove("open");
+    }
+
+    function backdropClose(e) {
+      if (e.target === settingsModal) closeSettings();
+    }
+
+    function changeLanguage() {
+      currentLangKey = langSelect.value;
+      const cfg = getLang();
+      msgInput.placeholder = cfg.placeholder;
+      voiceLabel.textContent = voiceEnabled ? cfg.voiceOn : cfg.voiceOff;
+      clearLabel.textContent = cfg.clearChat;
+      statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+      restartWakeListener();
+    }
+
+    function handleKey(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
       }
     }
 
-    function scheduleRestart(delay = 450) {
-      clearRestartTimer();
-      if (!isBBOn || !recognition) return;
-      restartTimer = setTimeout(() => {
-        if (isBBOn && !isListening) {
-          startListening();
-        }
-      }, delay);
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      const cfg = getLang();
+      voiceLabel.textContent = voiceEnabled ? cfg.voiceOn : cfg.voiceOff;
+      voiceBtn.classList.toggle("active", voiceEnabled);
+      if (!voiceEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     }
 
-    if (recognition) {
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
+    function speakReply(text) {
+      if (!voiceEnabled || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = getLang().speechLang;
+      window.speechSynthesis.speak(utterance);
+    }
 
-      recognition.onstart = () => {
-        isListening = true;
-        document.getElementById("orb").classList.add("listening");
-        document.getElementById("statusText").innerText = t().listeningStatus;
+    function clearChat() {
+      conversationHistory.length = 0;
+      const cfg = getLang();
+      chatContainer.innerHTML = "";
+      addMessage(cfg.welcome, "ai");
+      addSystemNote(cfg.clearedNote);
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function quickPrompt(type) {
+      const lastAi = [...conversationHistory].reverse().find((m) => m.role === "model");
+      const lastContext = lastAi?.parts?.[0]?.text || "";
+
+      const prompts = {
+        explain: lastContext
+          ? `Is baat ko aasan shabdon mein detail mein explain karo:\n"${lastContext.slice(0, 500)}"`
+          : "Mujhe kisi interesting topic ko aasan bhasha mein explain karo.",
+        summarize: lastContext
+          ? `Iska short aur crisp summary points mein do:\n"${lastContext.slice(0, 700)}"`
+          : "Ek short summary do ki tum kya-kya madad kar sakte ho.",
+        suggestions: lastContext
+          ? `Iske aage ke liye 4 smart suggestions do:\n"${lastContext.slice(0, 400)}"`
+          : "Aaj ke productivity aur study/work ke liye 4 smart suggestions do.",
+        more: "Is topic par aur extra helpful details aur examples do."
       };
 
-      recognition.onresult = (event) => {
+      sendMessage(prompts[type] || prompts.explain);
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".nav-item").forEach((el) => el.classList.remove("active"));
+      if (tab === "chat") {
+        document.getElementById("navChat").classList.add("active");
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } else if (tab === "history") {
+        document.getElementById("navHistory").classList.add("active");
+        addSystemNote(`Total messages in session: ${conversationHistory.length}`);
+      } else if (tab === "tools") {
+        document.getElementById("navTools").classList.add("active");
+        openSettings();
+      }
+    }
+
+    function stopWakeListener() {
+      if (wakeRecognizer) {
+        try {
+          wakeRecognizer.onend = null;
+          wakeRecognizer.stop();
+        } catch {}
+        wakeRecognizer = null;
+      }
+    }
+
+    function restartWakeListener() {
+      stopWakeListener();
+      if (!wakeWordEnabled || !SpeechRecognition || isRecordingCommand) return;
+
+      const cfg = getLang();
+      wakeRecognizer = new SpeechRecognition();
+      wakeRecognizer.lang = cfg.speechLang;
+      wakeRecognizer.continuous = true;
+      wakeRecognizer.interimResults = false;
+
+      wakeRecognizer.onresult = (event) => {
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
-            const transcript = event.results[i][0].transcript.trim();
-            if (transcript) {
-              processCommand(transcript);
+            const transcript = event.results[i][0].transcript.toLowerCase().trim();
+            if (
+              transcript.includes("hey bb") ||
+              transcript.includes("hey beebee") ||
+              transcript.includes("हे बीबी") ||
+              transcript.includes("हे बेबी")
+            ) {
+              startCommandListening();
+              break;
             }
           }
         }
       };
 
-      recognition.onerror = (event) => {
-        isListening = false;
-        document.getElementById("orb").classList.remove("listening");
+      wakeRecognizer.onerror = () => {};
 
-        if (!isBBOn) return;
-
-        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-          document.getElementById("statusText").innerText = t().micBlockedError;
-          return;
-        }
-
-        document.getElementById("statusText").innerText = t().onStatus;
-        scheduleRestart(700);
-      };
-
-      recognition.onend = () => {
-        isListening = false;
-        document.getElementById("orb").classList.remove("listening");
-        if (isBBOn) {
-          document.getElementById("statusText").innerText = t().onStatus;
-          scheduleRestart(350);
+      wakeRecognizer.onend = () => {
+        if (wakeWordEnabled && !isRecordingCommand && !isSending) {
+          setTimeout(() => restartWakeListener(), 350);
         }
       };
+
+      try {
+        wakeRecognizer.start();
+      } catch {}
     }
 
-    function setLanguage(lang) {
-      if (!I18N[lang]) return;
-      currentLang = lang;
-      localStorage.setItem(STORAGE_KEY, lang);
-      document.documentElement.lang = t().htmlLang;
-
-      if (recognition) {
-        recognition.lang = t().speechLang;
+    function toggleWakeWord() {
+      if (!SpeechRecognition) {
+        addSystemNote("Chrome browser mein Speech Recognition sabse achha kaam karta hai.");
+        return;
       }
-
-      document.querySelectorAll(".lang-btn").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.lang === lang);
-      });
-
-      document.getElementById("lockTitle").innerText = t().lockTitle;
-      document.getElementById("lockSub").innerText = t().lockSub;
-      document.getElementById("pinInput").placeholder = t().pinPlaceholder;
-      document.getElementById("unlockBtn").innerText = t().unlockBtn;
-
-      document.getElementById("appTitle").innerText = t().appTitle;
-      document.getElementById("appSub").innerText = t().appSub;
-
-      const powerBtn = document.getElementById("powerBtn");
-      const statusEl = document.getElementById("statusText");
-
-      if (isBBOn) {
-        powerBtn.innerText = t().turnOffBtn;
-        statusEl.innerText = isListening ? t().listeningStatus : t().onStatus;
-      } else {
-        powerBtn.innerText = t().turnOnBtn;
-        statusEl.innerText = t().offStatus;
-      }
-
-      const logBox = document.getElementById("chatLog");
-      if (logBox.children.length === 0) {
-        addLog(t().bbName, t().readyLog);
-      }
+      wakeWordEnabled = !wakeWordEnabled;
+      wakeToggleBtn.textContent = wakeWordEnabled ? "On" : "Off";
+      wakeToggleBtn.classList.toggle("on", wakeWordEnabled);
+      statusText.textContent = wakeWordEnabled ? getLang().onlineWake : "Online";
+      restartWakeListener();
     }
 
-    function unlockApp() {
-      const entered = document.getElementById("pinInput").value.trim();
-      const errorEl = document.getElementById("pinError");
-
-      if (entered === OWNER_PIN) {
-        errorEl.innerText = "";
-        document.getElementById("pinInput").value = "";
-        document.getElementById("lockScreen").classList.add("hidden");
-        document.getElementById("appScreen").classList.remove("hidden");
-      } else {
-        errorEl.innerText = t().wrongPin;
+    function startCommandListening() {
+      if (!SpeechRecognition) {
+        addSystemNote("Mic feature is not supported in this browser.");
+        return;
       }
-    }
 
-    function speak(text) {
+      if (isRecordingCommand && commandRecognizer) {
+        try {
+          commandRecognizer.stop();
+        } catch {}
+        return;
+      }
+
+      stopWakeListener();
+      isRecordingCommand = true;
+      const cfg = getLang();
+
+      micBtn.classList.add("listening");
+      micBtn.textContent = "🎙️";
+      statusText.textContent = cfg.listeningCmd;
+
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = t().speechLang;
-        window.speechSynthesis.speak(utter);
-      }
-    }
-
-    function toggleBB() {
-      isBBOn = !isBBOn;
-      const btn = document.getElementById("powerBtn");
-      const orb = document.getElementById("orb");
-      const status = document.getElementById("statusText");
-
-      clearRestartTimer();
-
-      if (isBBOn) {
-        btn.innerText = t().turnOffBtn;
-        btn.className = "btn-off";
-        orb.classList.add("active");
-        status.innerText = t().listeningStatus;
-
-        if (!recognition) {
-          alert(t().noSpeechSupport);
-          return;
-        }
-
-        addLog(t().bbName, t().onlineReply);
-        speak(t().onlineReply);
-        startListening();
-      } else {
-        btn.innerText = t().turnOnBtn;
-        btn.className = "btn-on";
-        orb.classList.remove("active", "listening");
-        status.innerText = t().offStatus;
-
-        if (recognition) {
-          try {
-            recognition.abort();
-          } catch (e) {}
-        }
-        if ("speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-        }
-        addLog(t().bbName, t().offReply);
-      }
-    }
-
-    function processCommand(rawText) {
-      const text = rawText.toLowerCase().trim();
-      addLog(t().userName, rawText);
-
-      const cleanCmd = text
-        .replace(/\bhey bb\b/gi, "")
-        .replace(/\bhe bb\b/gi, "")
-        .replace(/\bhi bb\b/gi, "")
-        .replace(/ /g, "")
-        .replace(/ /g, "")
-        .trim();
-
-      let reply = "";
-
-      if (cleanCmd === "" && (text.includes("bb") || text.includes(""))) {
-        reply = t().wakeReply;
-      } else if (
-        cleanCmd.includes("hello") ||
-        cleanCmd.includes("hi") ||
-        cleanCmd.includes("hey") ||
-        cleanCmd.includes("") ||
-        cleanCmd.includes("namaste")
-      ) {
-        reply = t().greetingReply;
-      } else if (
-        cleanCmd.includes("time") ||
-        cleanCmd.includes("") ||
-        cleanCmd.includes("kitne baje")
-      ) {
-        const locale = currentLang === "hi" ? "hi-IN" : "en-IN";
-        const now = new Date().toLocaleTimeString(locale, {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-        reply = t().timePrefix + now;
-      } else if (cleanCmd.includes("youtube") || cleanCmd.includes("")) {
-        reply = t().youtubeReply;
-        window.open("https://m.youtube.com", "_blank", "noopener,noreferrer");
-      } else if (cleanCmd.includes("google") || cleanCmd.includes("")) {
-        reply = t().googleReply;
-        window.open("https://www.google.com", "_blank", "noopener,noreferrer");
-      } else {
-        reply = t().fallbackPrefix + rawText + t().fallbackSuffix;
       }
 
-      addLog(t().bbName, reply);
-      speak(reply);
-    }
+      commandRecognizer = new SpeechRecognition();
+      commandRecognizer.lang = cfg.speechLang;
+      commandRecognizer.continuous = false;
+      commandRecognizer.interimResults = false;
 
-    function startListening() {
-      if (!isBBOn || !recognition || isListening) return;
+      commandRecognizer.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.trim();
+        if (spokenText) {
+          msgInput.value = spokenText;
+          sendMessage(spokenText);
+        }
+      };
 
-      recognition.lang = t().speechLang;
+      commandRecognizer.onerror = (event) => {
+        statusText.textContent = `Mic: ${event.error}`;
+      };
+
+      commandRecognizer.onend = () => {
+        isRecordingCommand = false;
+        micBtn.classList.remove("listening");
+        micBtn.textContent = "🎤";
+        if (!isSending) {
+          statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+          restartWakeListener();
+        }
+      };
+
       try {
-        recognition.start();
-      } catch (err) {
-        scheduleRestart(600);
+        commandRecognizer.start();
+      } catch {
+        isRecordingCommand = false;
+        micBtn.classList.remove("listening");
+        micBtn.textContent = "🎤";
+        restartWakeListener();
       }
     }
 
-    document.getElementById("pinInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        unlockApp();
-      }
-    });
+    async function sendMessage(overrideText = null) {
+      if (isSending) return;
+      const cfg = getLang();
+      const prompt = (overrideText !== null ? overrideText : msgInput.value).trim();
+      if (!prompt) return;
 
-    setLanguage(currentLang);
+      isSending = true;
+      stopWakeListener();
+
+      addMessage(prompt, "user");
+      conversationHistory.push({
+        role: "user",
+        parts: [{ text: prompt }]
+      });
+
+      msgInput.value = "";
+      msgInput.disabled = true;
+      micBtn.disabled = true;
+      statusText.textContent = cfg.thinking;
+
+      const loadingBubble = addMessage(cfg.thinking, "ai");
+
+      try {
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: cfg.systemPrompt }] },
+            contents: conversationHistory
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
+        }
+
+        const replyText =
+          data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+          "मुझे इसका जवाब नहीं मिल पाया।";
+
+        loadingBubble.textContent = replyText;
+        conversationHistory.push({
+          role: "model",
+          parts: [{ text: replyText }]
+        });
+
+        statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+        speakReply(replyText);
+      } catch (error) {
+        conversationHistory.pop();
+        loadingBubble.textContent = `Error: ${error.message}`;
+        statusText.textContent = "Error • Check Key";
+      } finally {
+        isSending = false;
+        msgInput.disabled = false;
+        micBtn.disabled = false;
+        msgInput.focus();
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        restartWakeListener();
+      }
+    }
+
+    window.addEventListener("load", () => {
+      const cfg = getLang();
+      addMessage(cfg.welcome, "ai");
+      changeLanguage();
+    });
   </script>
 </body>
 </html>
