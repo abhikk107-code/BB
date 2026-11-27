@@ -558,7 +558,7 @@
           </div>
           <div class="brand-info">
             <h1>BB Assistant</h1>
-            <p id="subTitle">Nova Brain Core ✨</p>
+            <p id="subTitle">OpenRouter + Nova Brain ✨</p>
           </div>
         </div>
 
@@ -648,6 +648,10 @@
   </div>
 
   <script>
+    const OPENROUTER_API_KEY = "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";
+    const OPENROUTER_MODEL = "openrouter/free";
+    const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+
     const LANG_CONFIG = {
       "hi-IN": {
         speechLang: "hi-IN",
@@ -655,11 +659,12 @@
         voiceOff: "Voice: Off",
         voiceOn: "Voice: On",
         clearChat: "Clear Chat",
-        welcome: 'नमस्ते! मैं BB हूँ (Nova Brain के साथ)। बोलने के लिए "Hey BB" कहें या Mic बटन दबाएँ।',
+        welcome: 'नमस्ते! मैं BB हूँ। बोलने के लिए "Hey BB" कहें या Mic बटन दबाएँ।',
         clearedNote: "चैट और कॉन्टेक्स्ट साफ़ कर दिए गए हैं।",
         thinking: "सोच रहा हूँ...",
         listeningCmd: 'सुन रहा हूँ... सवाल बोलें',
-        onlineWake: 'Online • "Hey BB"'
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt: "Tum BB ho, ek helpful aur clear AI assistant. Hamesha saral Hindi mein jawab do."
       },
       "hinglish": {
         speechLang: "hi-IN",
@@ -667,11 +672,12 @@
         voiceOff: "Voice: Off",
         voiceOn: "Voice: On",
         clearChat: "Clear Chat",
-        welcome: 'Namaste! Main BB hoon (Nova Brain ke saath). Mic on karne ke liye "Hey BB" bolein ya mic icon dabayein.',
+        welcome: 'Namaste! Main BB hoon. Mic on karne ke liye "Hey BB" bolein ya mic icon dabayein.',
         clearedNote: "Chat aur context clear kar diye gaye hain.",
         thinking: "Soch raha hoon...",
         listeningCmd: "Sun raha hoon... sawal bolein",
-        onlineWake: 'Online • "Hey BB"'
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt: "Tum BB ho, ek helpful aur clear AI assistant. Hamesha Hinglish mein jawab do."
       },
       "en-US": {
         speechLang: "en-US",
@@ -679,11 +685,12 @@
         voiceOff: "Voice: Off",
         voiceOn: "Voice: On",
         clearChat: "Clear Chat",
-        welcome: 'Hello! I am BB (powered by Nova Brain). Say "Hey BB" or tap the mic to start speaking.',
+        welcome: 'Hello! I am BB. Say "Hey BB" or tap the mic to start speaking.',
         clearedNote: "Chat and context cleared.",
         thinking: "Thinking...",
         listeningCmd: "Listening... speak now",
-        onlineWake: 'Online • "Hey BB"'
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt: "You are BB, a helpful and clear AI assistant. Always answer in English."
       }
     };
 
@@ -1070,6 +1077,36 @@
       }
     }
 
+    // ==================== OPENROUTER API + LOCAL BRAIN FALLBACK ====================
+
+    async function tryOpenRouterReply(prompt, cfg) {
+      if (!OPENROUTER_API_KEY) return null;
+
+      const res = await fetch(OPENROUTER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "HTTP-Referer": window.location.origin,
+          "X-Title": "BB AI Assistant"
+        },
+        body: JSON.stringify({
+          model: OPENROUTER_MODEL,
+          messages: [
+            { role: "system", content: cfg.systemPrompt },
+            { role: "user", content: prompt }
+          ]
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || `HTTP ${res.status}`);
+      }
+
+      return data?.choices?.[0]?.message?.content?.trim() || null;
+    }
+
     // ==================== UI & VOICE INTEGRATION ====================
 
     const bbBrain = new AIBrain("BB");
@@ -1379,9 +1416,22 @@
       const loadingBubble = addMessage(cfg.thinking, "ai");
 
       try {
-        await new Promise((r) => setTimeout(r, 240));
-        const brainResult = bbBrain.process(prompt, currentLangKey, modeType);
-        const replyText = brainResult.message;
+        let replyText = "";
+
+        if (OPENROUTER_API_KEY && !modeType) {
+          try {
+            replyText = await tryOpenRouterReply(prompt, cfg);
+          } catch {
+            replyText = "";
+          }
+        }
+
+        if (!replyText) {
+          await new Promise((r) => setTimeout(r, 220));
+          replyText = bbBrain.process(prompt, currentLangKey, modeType).message;
+        } else {
+          bbBrain.context.add(prompt, replyText);
+        }
 
         loadingBubble.textContent = replyText;
         statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
