@@ -1,1 +1,1196 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BB AI Assistant</title>
+  <style>
+    :root {
+      --bg-top: #070b1a;
+      --bg-bottom: #050814;
+      --card: rgba(16, 23, 46, 0.88);
+      --card-solid: #111830;
+      --border-glow: rgba(78, 124, 255, 0.45);
+      --border-subtle: rgba(120, 150, 255, 0.18);
+      --text: #f3f6ff;
+      --muted: #9aa7cc;
+      --user-grad: linear-gradient(135deg, #1b4dff 0%, #0d2b9c 100%);
+      --ai-bg: rgba(20, 27, 52, 0.92);
+      --accent: #4f7cff;
+      --purple-send: linear-gradient(135deg, #5e60ff 0%, #8a4fff 100%);
+      --green: #18d47c;
+      --danger: #ff4757;
+    }
 
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, #132152 0%, var(--bg-top) 45%, var(--bg-bottom) 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+
+    .phone-shell {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 12px 0;
+      position: relative;
+    }
+
+    /* Animations */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes floatBot {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes blinkEyes {
+      0%, 92%, 100% { transform: scaleY(1); }
+      96% { transform: scaleY(0.12); }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(79, 124, 255, 0.28); }
+      50% { box-shadow: 0 0 22px rgba(122, 92, 255, 0.45); }
+    }
+
+    @keyframes micPulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.65); }
+      70% { box-shadow: 0 0 0 11px rgba(255, 71, 87, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+    }
+
+    /* Header Card */
+    .header-card {
+      background: var(--card);
+      border: 1px solid var(--border-glow);
+      border-radius: 22px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(79, 124, 255, 0.14);
+      animation: fadeSlideUp 0.35s ease;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .bot-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #1b2c5c, #0d1530);
+      border: 1px solid rgba(114, 158, 255, 0.55);
+      display: grid;
+      place-items: center;
+      animation: floatBot 3s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .bot-avatar svg {
+      width: 34px;
+      height: 34px;
+    }
+
+    .bot-eyes {
+      transform-origin: center;
+      animation: blinkEyes 4.2s infinite;
+    }
+
+    .brand-info h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-info p {
+      margin: 2px 0 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+    }
+
+    .settings-btn {
+      background: rgba(27, 39, 75, 0.9);
+      color: var(--text);
+      border: 1px solid var(--border-glow);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .settings-btn:hover {
+      background: rgba(42, 61, 117, 0.95);
+    }
+
+    .settings-btn:active {
+      transform: scale(0.96);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.74rem;
+      color: #b7c6eb;
+      max-width: 170px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dot-online {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      flex-shrink: 0;
+    }
+
+    /* Action Row (Voice & Clear Chat) */
+    .top-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+      animation: fadeSlideUp 0.4s ease;
+    }
+
+    .pill-btn {
+      background: rgba(16, 24, 48, 0.85);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--border-glow);
+      background: rgba(24, 36, 72, 0.95);
+    }
+
+    .pill-btn:active {
+      transform: scale(0.97);
+    }
+
+    .pill-btn.active {
+      border-color: rgba(24, 212, 124, 0.65);
+      box-shadow: 0 0 14px rgba(24, 212, 124, 0.2);
+      color: #8df5c3;
+    }
+
+    /* Chat Area */
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      animation: fadeSlideUp 0.28s ease;
+    }
+
+    .msg-row.user {
+      justify-content: flex-end;
+    }
+
+    .msg-row.ai {
+      justify-content: flex-start;
+    }
+
+    .mini-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #14224a;
+      border: 1px solid var(--border-glow);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 0.85rem;
+    }
+
+    .msg-wrapper {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+
+    .msg-row.user .msg-wrapper {
+      align-items: flex-end;
+    }
+
+    .msg-row.ai .msg-wrapper {
+      align-items: flex-start;
+    }
+
+    .bubble {
+      padding: 11px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .msg-row.user .bubble {
+      background: var(--user-grad);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 6px 18px rgba(27, 77, 255, 0.3);
+    }
+
+    .msg-row.ai .bubble {
+      background: var(--ai-bg);
+      color: var(--text);
+      border: 1px solid var(--border-glow);
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .msg-meta {
+      margin-top: 4px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 4px;
+    }
+
+    .ticks {
+      color: #5ca4ff;
+      font-weight: 700;
+    }
+
+    .system-pill {
+      align-self: center;
+      font-size: 0.76rem;
+      color: var(--muted);
+      background: rgba(20, 29, 58, 0.75);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 12px;
+      border-radius: 999px;
+      animation: fadeSlideUp 0.25s ease;
+    }
+
+    /* Quick Action Chips */
+    .quick-chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      padding: 4px 0 8px;
+    }
+
+    .chip {
+      background: rgba(16, 24, 48, 0.9);
+      border: 1px solid var(--border-glow);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.18s ease;
+    }
+
+    .chip:hover {
+      background: rgba(35, 53, 107, 0.95);
+      transform: translateY(-1px);
+    }
+
+    /* Input Bar */
+    .input-box {
+      background: rgba(15, 22, 45, 0.95);
+      border: 1.5px solid var(--border-glow);
+      border-radius: 999px;
+      padding: 6px 8px 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: glowPulse 3.5s infinite;
+      margin-bottom: 10px;
+    }
+
+    .sparkle-icon {
+      color: #849bff;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    #msgInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.92rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    #msgInput::placeholder {
+      color: var(--muted);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 0.95rem;
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+    }
+
+    #micBtn {
+      background: rgba(36, 51, 96, 0.9);
+      color: #dbe6ff;
+      border: 1px solid rgba(118, 155, 255, 0.35);
+    }
+
+    #micBtn.listening {
+      background: var(--danger);
+      color: #fff;
+      animation: micPulse 1.2s infinite;
+    }
+
+    #sendBtn {
+      background: var(--purple-send);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(112, 86, 255, 0.45);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      background: #070b18;
+      border-top: 1px solid var(--border-subtle);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 8px 6px 10px;
+    }
+
+    .nav-item {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.18s ease, transform 0.15s ease;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Settings Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 16, 0.72);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 390px;
+      background: var(--card-solid);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      animation: fadeSlideUp 0.22s ease;
+    }
+
+    .modal-card h2 {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+    }
+
+    .setting-row {
+      margin-bottom: 14px;
+    }
+
+    .setting-row label {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #0a1024;
+      color: var(--text);
+      border: 1px solid var(--border-glow);
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a1024;
+      border: 1px solid var(--border-subtle);
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .toggle-btn {
+      background: #223263;
+      color: #fff;
+      border: 1px solid var(--border-glow);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .toggle-btn.on {
+      background: #148f56;
+      border-color: #2ce68f;
+    }
+
+    .close-modal-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: var(--user-grad);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-shell">
+    <div>
+      <!-- Top Header Card -->
+      <header class="header-card">
+        <div class="brand-left">
+          <div class="bot-avatar" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none">
+              <rect x="9" y="12" width="30" height="24" rx="10" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2.2"/>
+              <line x1="24" y1="5" x2="24" y2="12" stroke="#60a5fa" stroke-width="2.4" stroke-linecap="round"/>
+              <circle cx="24" cy="4.5" r="2.5" fill="#38bdf8"/>
+              <g class="bot-eyes">
+                <circle cx="18.5" cy="23.5" r="2.6" fill="#7dd3fc"/>
+                <circle cx="29.5" cy="23.5" r="2.6" fill="#7dd3fc"/>
+              </g>
+              <path d="M19 29.5C20.5 31.5 27.5 31.5 29 29.5" stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="brand-info">
+            <h1>BB Assistant</h1>
+            <p id="subTitle">Your smart companion ✨</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+          <div class="status-pill">
+            <span class="dot-online"></span>
+            <span id="statusText">Online • "Hey BB"</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Voice & Clear Chat Row -->
+      <div class="top-actions">
+        <button id="voiceBtn" class="pill-btn" onclick="toggleVoice()">
+          <span>🔊</span>
+          <span id="voiceLabel">Voice: Off</span>
+        </button>
+        <button id="clearBtn" class="pill-btn" onclick="clearChat()">
+          <span>🗑️</span>
+          <span id="clearLabel">Clear Chat</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <main id="chatContainer" class="chat-container"></main>
+
+    <!-- Bottom Controls -->
+    <div>
+      <div class="quick-chips">
+        <button class="chip" onclick="quickPrompt('explain')">⭐ Explain</button>
+        <button class="chip" onclick="quickPrompt('summarize')">⚡ Summarize</button>
+        <button class="chip" onclick="quickPrompt('suggestions')">💡 Suggestions</button>
+        <button class="chip" onclick="quickPrompt('more')">••• More</button>
+      </div>
+
+      <div class="input-box">
+        <span class="sparkle-icon">✦</span>
+        <input
+          id="msgInput"
+          type="text"
+          placeholder="Type your message..."
+          onkeydown="handleKey(event)"
+        />
+        <button id="micBtn" class="icon-btn" title="Speak" onclick="startCommandListening()">🎤</button>
+        <button id="sendBtn" class="icon-btn" title="Send" onclick="sendMessage()">➤</button>
+      </div>
+
+      <nav class="bottom-nav">
+        <button id="navChat" class="nav-item active" onclick="switchTab('chat')">
+          <span>💬</span>
+          <span>Chat</span>
+        </button>
+        <button id="navHistory" class="nav-item" onclick="switchTab('history')">
+          <span>🕒</span>
+          <span>History</span>
+        </button>
+        <button id="navTools" class="nav-item" onclick="switchTab('tools')">
+          <span>⊞</span>
+          <span>Tools</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop" onclick="backdropClose(event)">
+    <div class="modal-card">
+      <h2>Assistant Settings</h2>
+
+      <div class="setting-row">
+        <label for="langSelect">Language / भाषा</label>
+        <select id="langSelect" onchange="changeLanguage()">
+          <option value="hi-IN" selected>हिंदी (Hindi)</option>
+          <option value="hinglish">Hinglish</option>
+          <option value="en-US">English</option>
+        </select>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div style="font-size: 0.9rem; font-weight: 600;">Wake Word: "Hey BB"</div>
+          <div style="font-size: 0.75rem; color: var(--muted);">Bolte hi mic on ho jayega</div>
+        </div>
+        <button id="wakeToggleBtn" class="toggle-btn on" onclick="toggleWakeWord()">On</button>
+      </div>
+
+      <button class="close-modal-btn" onclick="closeSettings()">Done</button>
+    </div>
+  </div>
+
+  <script>
+    // Agar future mein valid Gemini key mile to yahan daal sakte ho; warna Smart Local Brain automatically kaam karega.
+    const API_KEY = "";
+    const MODEL_NAME = "gemini-flash-latest";
+    const ENDPOINT = API_KEY
+      ? `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`
+      : "";
+
+    const LANG_CONFIG = {
+      "hi-IN": {
+        speechLang: "hi-IN",
+        placeholder: "अपना संदेश लिखें या 'Hey BB' बोलें...",
+        voiceOff: "Voice: Off",
+        voiceOn: "Voice: On",
+        clearChat: "Clear Chat",
+        welcome: 'नमस्ते! मैं BB हूँ। बोलने के लिए "Hey BB" कहें या Mic बटन दबाएँ।',
+        clearedNote: "चैट साफ़ कर दी गई है।",
+        thinking: "सोच रहा हूँ...",
+        listeningCmd: 'सुन रहा हूँ... सवाल बोलें',
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt:
+          "Tum BB ho, ek helpful, clear aur friendly AI assistant. Hamesha saral aur clear Hindi mein jawab do."
+      },
+      "hinglish": {
+        speechLang: "hi-IN",
+        placeholder: "Type your message or say 'Hey BB'...",
+        voiceOff: "Voice: Off",
+        voiceOn: "Voice: On",
+        clearChat: "Clear Chat",
+        welcome: 'Namaste! Main BB hoon. Mic on karne ke liye "Hey BB" bolein ya mic icon dabayein.',
+        clearedNote: "Chat clear kar di gayi hai.",
+        thinking: "Soch raha hoon...",
+        listeningCmd: "Sun raha hoon... sawal bolein",
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt:
+          "Tum BB ho, ek helpful, clear aur friendly AI assistant. Hamesha Hinglish (Roman Hindi) mein jawab do."
+      },
+      "en-US": {
+        speechLang: "en-US",
+        placeholder: "Type your message...",
+        voiceOff: "Voice: Off",
+        voiceOn: "Voice: On",
+        clearChat: "Clear Chat",
+        welcome: 'Hello! I am BB. Say "Hey BB" or tap the mic to start speaking.',
+        clearedNote: "Chat cleared.",
+        thinking: "Thinking...",
+        listeningCmd: "Listening... speak now",
+        onlineWake: 'Online • "Hey BB"',
+        systemPrompt:
+          "You are BB, a helpful, clear, and smart AI assistant. Always answer clearly in English."
+      }
+    };
+
+    const conversationHistory = [];
+    let currentLangKey = "hi-IN";
+    let voiceEnabled = false;
+    let wakeWordEnabled = true;
+    let isRecordingCommand = false;
+    let isSending = false;
+
+    const chatContainer = document.getElementById("chatContainer");
+    const msgInput = document.getElementById("msgInput");
+    const micBtn = document.getElementById("micBtn");
+    const voiceBtn = document.getElementById("voiceBtn");
+    const voiceLabel = document.getElementById("voiceLabel");
+    const clearLabel = document.getElementById("clearLabel");
+    const statusText = document.getElementById("statusText");
+    const langSelect = document.getElementById("langSelect");
+    const wakeToggleBtn = document.getElementById("wakeToggleBtn");
+    const settingsModal = document.getElementById("settingsModal");
+
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    let wakeRecognizer = null;
+    let commandRecognizer = null;
+
+    function getLang() {
+      return LANG_CONFIG[currentLangKey] || LANG_CONFIG["hi-IN"];
+    }
+
+    function nowTime() {
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function addSystemNote(text) {
+      const div = document.createElement("div");
+      div.className = "system-pill";
+      div.textContent = text;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function addMessage(text, sender) {
+      const row = document.createElement("div");
+      row.className = `msg-row ${sender}`;
+
+      if (sender === "ai") {
+        const av = document.createElement("div");
+        av.className = "mini-avatar";
+        av.textContent = "🤖";
+        row.appendChild(av);
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "msg-wrapper";
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text;
+
+      const meta = document.createElement("div");
+      meta.className = "msg-meta";
+      meta.innerHTML =
+        sender === "user"
+          ? `<span>${nowTime()}</span><span class="ticks">✓✓</span>`
+          : `<span>${nowTime()}</span>`;
+
+      wrapper.appendChild(bubble);
+      wrapper.appendChild(meta);
+      row.appendChild(wrapper);
+
+      if (sender === "user") {
+        const uAv = document.createElement("div");
+        uAv.className = "mini-avatar";
+        uAv.textContent = "👤";
+        row.appendChild(uAv);
+      }
+
+      chatContainer.appendChild(row);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return bubble;
+    }
+
+    function openSettings() {
+      settingsModal.classList.add("open");
+    }
+
+    function closeSettings() {
+      settingsModal.classList.remove("open");
+    }
+
+    function backdropClose(e) {
+      if (e.target === settingsModal) closeSettings();
+    }
+
+    function changeLanguage() {
+      currentLangKey = langSelect.value;
+      const cfg = getLang();
+      msgInput.placeholder = cfg.placeholder;
+      voiceLabel.textContent = voiceEnabled ? cfg.voiceOn : cfg.voiceOff;
+      clearLabel.textContent = cfg.clearChat;
+      statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+      restartWakeListener();
+    }
+
+    function handleKey(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      const cfg = getLang();
+      voiceLabel.textContent = voiceEnabled ? cfg.voiceOn : cfg.voiceOff;
+      voiceBtn.classList.toggle("active", voiceEnabled);
+      if (!voiceEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function speakReply(text) {
+      if (!voiceEnabled || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = getLang().speechLang;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function clearChat() {
+      conversationHistory.length = 0;
+      const cfg = getLang();
+      chatContainer.innerHTML = "";
+      addMessage(cfg.welcome, "ai");
+      addSystemNote(cfg.clearedNote);
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    // Smart Local Brain for instant replies without API key errors
+    function generateSmartLocalReply(prompt, modeType = null) {
+      const clean = prompt.trim();
+      const lower = clean.toLowerCase();
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const dateStr = now.toLocaleDateString([], {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+
+      const isGreeting =
+        /^(hi|hii|hiii|hello|hey|namaste|नमस्ते|प्रणाम|yo)\b/i.test(lower);
+      const asksTime =
+        lower.includes("time") || lower.includes("samay") || lower.includes("समय") || lower.includes("baj");
+      const asksDate =
+        lower.includes("date") || lower.includes("aaj") || lower.includes("today") || lower.includes("तारीख");
+      const asksIdentity =
+        lower.includes("kaun ho") || lower.includes("who are you") || lower.includes("tum kaun") || lower.includes("नाम");
+
+      if (modeType === "explain") {
+        if (currentLangKey === "en-US") {
+          return `Simple breakdown:\n• Core idea: "${clean.slice(0, 140)}"\n• Step 1: Break it into small parts.\n• Step 2: Apply it to one real example.\n• Tip: Ask me for a specific example if you want deeper detail.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Aasan shabdon mein samajhte hain:\n• Main point: "${clean.slice(0, 140)}"\n• Step 1: Isko chhote-chhote hisson mein baanto.\n• Step 2: Ek real example se jodo.\n• Tip: Agar kisi ek hisse ko aur gehrai se samajhna hai to poochho.`;
+        }
+        return `आसान शब्दों में समझते हैं:\n• मुख्य बात: "${clean.slice(0, 140)}"\n• पहला कदम: इसे छोटे हिस्सों में बाँटें।\n• दूसरा कदम: किसी एक उदाहरण से जोड़कर देखें।\n• सुझाव: किसी खास हिस्से पर और जानकारी चाहिए तो पूछें।`;
+      }
+
+      if (modeType === "summarize") {
+        if (currentLangKey === "en-US") {
+          return `Quick Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Keep actions clear and short.\n• Pick the top priority first.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Short Summary:\n• Focus: "${clean.slice(0, 120)}"\n• Kaam ko seedha aur clear rakho.\n• Sabse zaroori point par pehle dhyan do.`;
+        }
+        return `संक्षेप में:\n• विषय: "${clean.slice(0, 120)}"\n• बात को सीधा और स्पष्ट रखें।\n• सबसे ज़रूरी बिंदु पर पहले ध्यान दें।`;
+      }
+
+      if (modeType === "suggestions") {
+        if (currentLangKey === "en-US") {
+          return `4 Smart Suggestions:\n1. Set one clear goal for the next 30 minutes.\n2. Remove distractions while working.\n3. Test ideas quickly with small steps.\n4. Review what worked best today.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `4 Smart Suggestions:\n1. Agle 30 minute ke liye ek clear goal set karo.\n2. Kaam karte waqt distractions kam rakho.\n3. Chhote steps se jaldi test karke dekho.\n4. Din ke end mein dekho kya best kaam kiya.`;
+        }
+        return `4 उपयोगी सुझाव:\n1. अगले 30 मिनट के लिए एक स्पष्ट लक्ष्य तय करें।\n2. काम करते समय ध्यान भटकाने वाली चीज़ें दूर रखें।\n3. छोटे कदमों से तुरंत प्रयोग करके देखें।\n4. आखिर में देखें कि कौन-सा तरीका सबसे अच्छा रहा।`;
+      }
+
+      if (modeType === "more") {
+        if (currentLangKey === "en-US") {
+          return `Extra details & example:\nThink of it like building a clean routine—consistency beats intensity. Start with a small 5-minute action, refine it, and build momentum.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Extra details aur example:\nIsko ek achhi routine ki tarah samjho—regularity sabse zaroori hai. 5 minute ke chhote step se shuru karo aur dheere-dheere speed badhao.`;
+        }
+        return `अतिरिक्त जानकारी और उदाहरण:\nइसे एक अच्छी आदत की तरह समझें—निरंतरता सबसे ज़रूरी है। 5 मिनट के छोटे कदम से शुरुआत करें और धीरे-धीरे आगे बढ़ाएँ।`;
+      }
+
+      if (isGreeting) {
+        if (currentLangKey === "en-US") {
+          return `Hey there! I'm BB Assistant. How can I help you today?`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Hey! Main BB Assistant hoon. Batao aaj kya madad chahiye?`;
+        }
+        return `नमस्ते! मैं BB Assistant हूँ। बताइए आज मैं आपकी क्या मदद कर सकता हूँ?`;
+      }
+
+      if (asksIdentity) {
+        if (currentLangKey === "en-US") {
+          return `I am BB, your smart voice & chat assistant built right into this web app.`;
+        }
+        if (currentLangKey === "hinglish") {
+          return `Main BB hoon—tumhara smart voice aur chat assistant.`;
+        }
+        return `मैं BB हूँ—आपका स्मार्ट वॉइस और चैट असिस्टेंट।`;
+      }
+
+      if (asksTime) {
+        if (currentLangKey === "en-US") return `Current time is ${timeStr}.`;
+        if (currentLangKey === "hinglish") return `Abhi ${timeStr} baj rahe hain.`;
+        return `अभी समय ${timeStr} हुआ है।`;
+      }
+
+      if (asksDate) {
+        if (currentLangKey === "en-US") return `Today is ${dateStr}.`;
+        if (currentLangKey === "hinglish") return `Aaj ${dateStr} hai.`;
+        return `आज दिनांक ${dateStr} है।`;
+      }
+
+      // General intelligent response tailored to selected language
+      if (currentLangKey === "en-US") {
+        return `Got it—you asked about "${clean}".\nHere is a helpful take: break the task into clear steps, start with the most important part, and ask me to Explain, Summarize, or give Suggestions anytime.`;
+      }
+      if (currentLangKey === "hinglish") {
+        return `Samajh gaya—tumne "${clean}" ke baare mein poocha hai.\nIske liye sabse achha tareeka yeh hai ki isko clear steps mein baanto, main part se shuru karo, aur zaroorat pade to Explain, Summarize ya Suggestions wale chips use karo.`;
+      }
+      return `समझ गया—आपने "${clean}" के बारे में पूछा है।\nइसे आसान बनाने के लिए इसे स्पष्ट हिस्सों में बाँटें, मुख्य हिस्से से शुरुआत करें, और ज़रूरत पड़ने पर Explain, Summarize या Suggestions बटन का उपयोग करें।`;
+    }
+
+    function quickPrompt(type) {
+      const lastUser = [...conversationHistory].reverse().find((m) => m.role === "user");
+      const lastContext = lastUser?.parts?.[0]?.text || "Aaj ke kaam aur seekhne ka tareeka";
+
+      const labels = {
+        explain: currentLangKey === "en-US" ? `Explain: ${lastContext}` : `Explain karo: ${lastContext}`,
+        summarize: currentLangKey === "en-US" ? `Summarize: ${lastContext}` : `Summarize karo: ${lastContext}`,
+        suggestions: currentLangKey === "en-US" ? `Suggestions for: ${lastContext}` : `Suggestions do: ${lastContext}`,
+        more: currentLangKey === "en-US" ? `More on: ${lastContext}` : `Aur details do: ${lastContext}`
+      };
+
+      sendMessage(labels[type] || labels.explain, type);
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".nav-item").forEach((el) => el.classList.remove("active"));
+      if (tab === "chat") {
+        document.getElementById("navChat").classList.add("active");
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } else if (tab === "history") {
+        document.getElementById("navHistory").classList.add("active");
+        addSystemNote(`Total messages in session: ${conversationHistory.length}`);
+      } else if (tab === "tools") {
+        document.getElementById("navTools").classList.add("active");
+        openSettings();
+      }
+    }
+
+    function stopWakeListener() {
+      if (wakeRecognizer) {
+        try {
+          wakeRecognizer.onend = null;
+          wakeRecognizer.stop();
+        } catch {}
+        wakeRecognizer = null;
+      }
+    }
+
+    function restartWakeListener() {
+      stopWakeListener();
+      if (!wakeWordEnabled || !SpeechRecognition || isRecordingCommand) return;
+
+      const cfg = getLang();
+      wakeRecognizer = new SpeechRecognition();
+      wakeRecognizer.lang = cfg.speechLang;
+      wakeRecognizer.continuous = true;
+      wakeRecognizer.interimResults = false;
+
+      wakeRecognizer.onresult = (event) => {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            const transcript = event.results[i][0].transcript.toLowerCase().trim();
+            if (
+              transcript.includes("hey bb") ||
+              transcript.includes("hey beebee") ||
+              transcript.includes("हे बीबी") ||
+              transcript.includes("हे बेबी")
+            ) {
+              startCommandListening();
+              break;
+            }
+          }
+        }
+      };
+
+      wakeRecognizer.onerror = () => {};
+
+      wakeRecognizer.onend = () => {
+        if (wakeWordEnabled && !isRecordingCommand && !isSending) {
+          setTimeout(() => restartWakeListener(), 350);
+        }
+      };
+
+      try {
+        wakeRecognizer.start();
+      } catch {}
+    }
+
+    function toggleWakeWord() {
+      if (!SpeechRecognition) {
+        addSystemNote("Chrome browser mein Speech Recognition sabse achha kaam karta hai.");
+        return;
+      }
+      wakeWordEnabled = !wakeWordEnabled;
+      wakeToggleBtn.textContent = wakeWordEnabled ? "On" : "Off";
+      wakeToggleBtn.classList.toggle("on", wakeWordEnabled);
+      statusText.textContent = wakeWordEnabled ? getLang().onlineWake : "Online";
+      restartWakeListener();
+    }
+
+    function startCommandListening() {
+      if (!SpeechRecognition) {
+        addSystemNote("Mic feature is not supported in this browser.");
+        return;
+      }
+
+      if (isRecordingCommand && commandRecognizer) {
+        try {
+          commandRecognizer.stop();
+        } catch {}
+        return;
+      }
+
+      stopWakeListener();
+      isRecordingCommand = true;
+      const cfg = getLang();
+
+      micBtn.classList.add("listening");
+      micBtn.textContent = "🎙️";
+      statusText.textContent = cfg.listeningCmd;
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      commandRecognizer = new SpeechRecognition();
+      commandRecognizer.lang = cfg.speechLang;
+      commandRecognizer.continuous = false;
+      commandRecognizer.interimResults = false;
+
+      commandRecognizer.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.trim();
+        if (spokenText) {
+          msgInput.value = spokenText;
+          sendMessage(spokenText);
+        }
+      };
+
+      commandRecognizer.onerror = (event) => {
+        statusText.textContent = `Mic: ${event.error}`;
+      };
+
+      commandRecognizer.onend = () => {
+        isRecordingCommand = false;
+        micBtn.classList.remove("listening");
+        micBtn.textContent = "🎤";
+        if (!isSending) {
+          statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+          restartWakeListener();
+        }
+      };
+
+      try {
+        commandRecognizer.start();
+      } catch {
+        isRecordingCommand = false;
+        micBtn.classList.remove("listening");
+        micBtn.textContent = "🎤";
+        restartWakeListener();
+      }
+    }
+
+    async function sendMessage(overrideText = null, modeType = null) {
+      if (isSending) return;
+      const cfg = getLang();
+      const prompt = (overrideText !== null ? overrideText : msgInput.value).trim();
+      if (!prompt) return;
+
+      isSending = true;
+      stopWakeListener();
+
+      addMessage(prompt, "user");
+      conversationHistory.push({
+        role: "user",
+        parts: [{ text: prompt }]
+      });
+
+      msgInput.value = "";
+      msgInput.disabled = true;
+      micBtn.disabled = true;
+      statusText.textContent = cfg.thinking;
+
+      const loadingBubble = addMessage(cfg.thinking, "ai");
+
+      try {
+        let replyText = "";
+
+        if (API_KEY) {
+          const response = await fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: cfg.systemPrompt }] },
+              contents: conversationHistory
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data?.error?.message || `HTTP Error ${response.status}`);
+          }
+
+          replyText =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+            generateSmartLocalReply(prompt, modeType);
+        } else {
+          await new Promise((r) => setTimeout(r, 320));
+          replyText = generateSmartLocalReply(prompt, modeType);
+        }
+
+        loadingBubble.textContent = replyText;
+        conversationHistory.push({
+          role: "model",
+          parts: [{ text: replyText }]
+        });
+
+        statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+        speakReply(replyText);
+      } catch (error) {
+        // Fallback smoothly to Smart Local Brain if API request fails
+        const fallbackReply = generateSmartLocalReply(prompt, modeType);
+        loadingBubble.textContent = fallbackReply;
+        conversationHistory.push({
+          role: "model",
+          parts: [{ text: fallbackReply }]
+        });
+        statusText.textContent = wakeWordEnabled ? cfg.onlineWake : "Online";
+        speakReply(fallbackReply);
+      } finally {
+        isSending = false;
+        msgInput.disabled = false;
+        micBtn.disabled = false;
+        msgInput.focus();
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        restartWakeListener();
+      }
+    }
+
+    window.addEventListener("load", () => {
+      const cfg = getLang();
+      addMessage(cfg.welcome, "ai");
+      changeLanguage();
+    });
+  </script>
+</body>
+</html>
